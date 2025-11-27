@@ -146,7 +146,7 @@
      - created_at (timestamp)
      - UNIQUE(user_id, conference_id)
 
-   - [ ] Create `crawl_logs` table
+   - [x] Create `crawl_logs` table
      - id (uuid, primary key)
      - conference_id (uuid, foreign key → conferences)
      - status (text: 'success', 'failed', 'partial')
@@ -156,15 +156,16 @@
 
 
 2. **Indexes & Views**
-   - [ ] Create indexes:
-     - `conferences(url)` (unique)
-     - `conferences(industry)`
-     - `conferences(start_date)`
-     - `speakers(conference_id)`
-     - `speakers(company)`
-     - `exhibitors(conference_id)`
-     - `exhibitors(company_name)`
-     - `bookmarks(user_id, conference_id)`
+   - [x] Create indexes:
+     - `conferences(url)` (unique) ✅
+     - `conferences(industry)` ✅ (GIN index)
+     - `conferences(start_date)` ✅
+     - `speakers(conference_id)` ✅
+     - `speakers(company)` ✅
+     - `exhibitors(conference_id)` ✅
+     - `exhibitors(company_name)` ✅
+     - `bookmarks(user_id, conference_id)` ✅
+     - Additional indexes: `crawl_logs` indexes, `speakers(name)`, `exhibitors(tier)`, `conferences(created_at)` ✅
 
    - [ ] **Note:** Company intelligence will use simple SQL queries instead of materialized views for MVP. Views can be added later if performance becomes an issue.
 
