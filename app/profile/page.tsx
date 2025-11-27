@@ -251,6 +251,16 @@ export default function ProfilePage() {
             </div>
             {editing ? (
               <div className="space-y-4">
+                {profileUpdateError && (
+                  <div className="rounded-md bg-red-50 p-3">
+                    <p className="text-sm text-red-800">{profileUpdateError}</p>
+                  </div>
+                )}
+                {profileUpdateMessage && (
+                  <div className="rounded-md bg-green-50 p-3">
+                    <p className="text-sm text-green-800">{profileUpdateMessage}</p>
+                  </div>
+                )}
                 <div>
                   <label htmlFor="display_name" className="block text-sm font-medium text-gray-700 mb-1">
                     Display Name
