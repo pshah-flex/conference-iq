@@ -3,64 +3,66 @@
 import Link from 'next/link';
 import { Conference } from '@/types';
 import { format } from 'date-fns';
-import { Bookmark, MapPin, Calendar, Users } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/app/contexts/AuthContext';
+import { MapPin, Calendar, Users } from 'lucide-react';
+// TEMPORARY: Auth imports disabled until Phase 12
+// import { useState, useEffect } from 'react';
+// import { useAuth } from '@/app/contexts/AuthContext';
 
 interface ConferenceCardProps {
   conference: Conference;
 }
 
 export default function ConferenceCard({ conference }: ConferenceCardProps) {
-  const { user } = useAuth();
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  // TEMPORARY: Auth disabled until Phase 12
+  // const { user } = useAuth();
+  // const [isBookmarked, setIsBookmarked] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
+  // TEMPORARY: Bypass bookmark functionality until Phase 12
   // Check if conference is bookmarked
-  useEffect(() => {
-    if (user) {
-      fetch(`/api/bookmarks/${conference.id}/check`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.isBookmarked !== undefined) {
-            setIsBookmarked(data.isBookmarked);
-          }
-        })
-        .catch(() => {
-          // Ignore errors
-        });
-    }
-  }, [user, conference.id]);
+  // useEffect(() => {
+  //   if (user) {
+  //     fetch(`/api/bookmarks/${conference.id}/check`)
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         if (data.isBookmarked !== undefined) {
+  //           setIsBookmarked(data.isBookmarked);
+  //         }
+  //       })
+  //       .catch(() => {
+  //         // Ignore errors
+  //       });
+  //   }
+  // }, [user, conference.id]);
 
-  const handleBookmark = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!user) {
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      if (isBookmarked) {
-        await fetch(`/api/bookmarks/${conference.id}`, {
-          method: 'DELETE',
-        });
-        setIsBookmarked(false);
-      } else {
-        await fetch('/api/bookmarks', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ conferenceId: conference.id }),
-        });
-        setIsBookmarked(true);
-      }
-    } catch (error) {
-      console.error('Failed to toggle bookmark:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // TEMPORARY: Bookmark functionality disabled until Phase 12
+  // const handleBookmark = async (e: React.MouseEvent) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   if (!user) {
+  //     return;
+  //   }
+  //   setIsLoading(true);
+  //   try {
+  //     if (isBookmarked) {
+  //       await fetch(`/api/bookmarks/${conference.id}`, {
+  //         method: 'DELETE',
+  //       });
+  //       setIsBookmarked(false);
+  //     } else {
+  //       await fetch('/api/bookmarks', {
+  //         method: 'POST',
+  //         headers: { 'Content-Type': 'application/json' },
+  //         body: JSON.stringify({ conferenceId: conference.id }),
+  //       });
+  //       setIsBookmarked(true);
+  //     }
+  //   } catch (error) {
+  //     console.error('Failed to toggle bookmark:', error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const completenessPercentage = conference.total_fields_count > 0
     ? Math.round((conference.fields_populated_count / conference.total_fields_count) * 100)
@@ -85,7 +87,8 @@ export default function ConferenceCard({ conference }: ConferenceCardProps) {
           <h3 className="text-xl font-semibold text-gray-900 hover:text-indigo-600">
             {conference.name}
           </h3>
-          {user && (
+          {/* TEMPORARY: Hide bookmark button until Phase 12 */}
+          {/* {user && (
             <button
               onClick={handleBookmark}
               disabled={isLoading}
@@ -96,7 +99,7 @@ export default function ConferenceCard({ conference }: ConferenceCardProps) {
             >
               <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
             </button>
-          )}
+          )} */}
         </div>
 
         <div className="space-y-2 mb-4">

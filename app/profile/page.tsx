@@ -7,15 +7,17 @@ import { useEffect } from 'react';
 // Force dynamic rendering to avoid build-time Supabase initialization
 export const dynamic = 'force-dynamic';
 
+// TEMPORARY: Bypass authentication until Phase 12
 export default function ProfilePage() {
   const { user, session, loading, signOut } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login');
-    }
-  }, [user, loading, router]);
+  // TEMPORARY: Don't redirect if not authenticated
+  // useEffect(() => {
+  //   if (!loading && !user) {
+  //     router.push('/auth/login');
+  //   }
+  // }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -25,8 +27,28 @@ export default function ProfilePage() {
     );
   }
 
+  // TEMPORARY: Show message if not authenticated instead of redirecting
   if (!user) {
-    return null;
+    return (
+      <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center p-24">
+        <div className="w-full max-w-md space-y-8">
+          <div>
+            <h2 className="text-3xl font-bold">Profile</h2>
+            <p className="mt-2 text-gray-600">
+              Authentication is currently bypassed. This page will require login in Phase 12.
+            </p>
+            <div className="mt-4">
+              <a
+                href="/conferences"
+                className="text-indigo-600 hover:text-indigo-500"
+              >
+                ← Back to Conferences
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
