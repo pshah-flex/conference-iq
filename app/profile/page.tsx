@@ -3,7 +3,6 @@
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { ProfilesRepository } from '@/lib/repositories';
 import { createClientSupabaseWithAuth } from '@/lib/supabase';
 import type { Profile } from '@/types';
 import Link from 'next/link';
@@ -32,6 +31,8 @@ export default function ProfilePage() {
   });
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [profileUpdateMessage, setProfileUpdateMessage] = useState<string | null>(null);
+  const [profileUpdateError, setProfileUpdateError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -44,17 +45,18 @@ export default function ProfilePage() {
       if (!user) return;
 
       try {
-        const profilesRepo = new ProfilesRepository();
-        const result = await profilesRepo.findByUserId(user.id);
+        const response = await fetch('/api/profile');
         
-        if (result.error) {
-          console.error('Error fetching profile:', result.error);
-        } else if (result.data) {
-          setProfile(result.data);
+        if (response.ok) {
+          const data = await response.json();
+          setProfile(data);
           setEditForm({
-            display_name: result.data.display_name || '',
-            bio: result.data.bio || '',
+            display_name: data.display_name || '',
+            bio: data.bio || '',
           });
+        } else {
+          const error = await response.json();
+          console.error('Error fetching profile:', error);
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -98,20 +100,42 @@ export default function ProfilePage() {
 
     setSaving(true);
     try {
-      const profilesRepo = new ProfilesRepository();
-      const result = await profilesRepo.update(user.id, {
-        display_name: editForm.display_name || undefined,
-        bio: editForm.bio || undefined,
+      const response = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          display_name: editForm.display_name || null,
+          bio: editForm.bio || null,
+        }),
       });
 
-      if (result.error) {
-        alert(`Error updating profile: ${result.error.message}`);
-      } else if (result.data) {
-        setProfile(result.data);
+      if (response.ok) {
+        const data = await response.json();
+        setProfile(data);
         setEditing(false);
+        setProfileUpdateMessage('Profile updated successfully!');
+        setTimeout(() => setProfileUpdateMessage(null), 3000);
+      } else {
+        let errorMessage = 'Unknown error occurred';
+        try {
+          const error = await response.json();
+          errorMessage = error.error || error.message || errorMessage;
+        } catch (e) {
+          try {
+            const text = await response.text();
+            errorMessage = text || errorMessage;
+          } catch (textError) {
+            errorMessage = response.statusText || errorMessage;
+          }
+        }
+        setProfileUpdateError(errorMessage);
+        setTimeout(() => setProfileUpdateError(null), 5000);
       }
     } catch (error: any) {
-      alert(`Error updating profile: ${error.message}`);
+      setProfileUpdateError(error.message || 'Failed to update profile');
+      setTimeout(() => setProfileUpdateError(null), 5000);
     } finally {
       setSaving(false);
     }
