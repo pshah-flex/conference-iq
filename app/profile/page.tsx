@@ -4,6 +4,9 @@ import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+// Force dynamic rendering to avoid build-time Supabase initialization
+export const dynamic = 'force-dynamic';
+
 export default function ProfilePage() {
   const { user, session, loading, signOut } = useAuth();
   const router = useRouter();

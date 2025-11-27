@@ -32,6 +32,10 @@ export const createServerSupabase = async () => {
 
 // Client-side Supabase client with auth (for Client Components)
 export const createClientSupabaseWithAuth = () => {
+  // Only create client in browser environment
+  if (typeof window === 'undefined') {
+    throw new Error('createClientSupabaseWithAuth can only be called in browser environment');
+  }
   return createClientComponentClient();
 };
 

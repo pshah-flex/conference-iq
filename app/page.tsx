@@ -3,6 +3,9 @@
 import { useAuth } from './contexts/AuthContext';
 import Link from 'next/link';
 
+// Force dynamic rendering to avoid build-time Supabase initialization
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const { user, loading } = useAuth();
 
@@ -55,4 +58,3 @@ export default function Home() {
     </div>
   );
 }
-

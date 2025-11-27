@@ -4,30 +4,38 @@ import { useState } from 'react';
 import { createClientSupabaseWithAuth } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
+// Force dynamic rendering to avoid build-time Supabase initialization
+export const dynamic = 'force-dynamic';
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClientSupabaseWithAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const supabase = createClientSupabaseWithAuth();
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      } else {
+        router.push('/');
+        router.refresh();
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign in');
       setLoading(false);
-    } else {
-      router.push('/');
-      router.refresh();
     }
   };
 

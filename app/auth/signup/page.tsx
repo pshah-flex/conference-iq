@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { createClientSupabaseWithAuth } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
+// Force dynamic rendering to avoid build-time Supabase initialization
+export const dynamic = 'force-dynamic';
+
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,7 +14,6 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClientSupabaseWithAuth();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,16 +21,22 @@ export default function SignupPage() {
     setError(null);
     setMessage(null);
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    try {
+      const supabase = createClientSupabaseWithAuth();
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
-      setMessage('Check your email to confirm your account!');
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      } else {
+        setMessage('Check your email to confirm your account!');
+        setLoading(false);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to create account');
       setLoading(false);
     }
   };

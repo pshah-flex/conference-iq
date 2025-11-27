@@ -30,30 +30,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClientSupabaseWithAuth();
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    // Lazy initialization - only create client when in browser
+    if (typeof window === 'undefined') {
       setLoading(false);
-    });
+      return;
+    }
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    try {
+      const supabase = createClientSupabaseWithAuth();
+
+      // Get initial session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      });
+
+      // Listen for auth changes
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      });
+
+      return () => subscription.unsubscribe();
+    } catch (error) {
+      // Handle missing env vars gracefully during build
+      console.error('Failed to initialize Supabase client:', error);
       setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [supabase.auth]);
+    }
+  }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    if (typeof window === 'undefined') return;
+    try {
+      const supabase = createClientSupabaseWithAuth();
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Failed to sign out:', error);
+    }
   };
 
   return (

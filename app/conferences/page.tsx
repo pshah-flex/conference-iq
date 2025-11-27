@@ -7,6 +7,9 @@ import ConferenceCard from '@/app/components/ConferenceCard';
 import Pagination from '@/app/components/Pagination';
 import { ArrowUpDown } from 'lucide-react';
 
+// Force dynamic rendering to avoid build-time Supabase initialization
+export const dynamic = 'force-dynamic';
+
 type SortOption = 'date' | 'name' | 'completeness';
 
 export default function ConferencesPage() {
