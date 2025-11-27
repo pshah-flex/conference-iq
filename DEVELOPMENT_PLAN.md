@@ -11,13 +11,13 @@
 2. [Phase 1: Database Schema & Migrations](#phase-1-database-schema--migrations)
 3. [Phase 2: Core Data Models & Repositories](#phase-2-core-data-models--repositories)
 4. [Phase 3: API Endpoints](#phase-3-api-endpoints)
-5. [Phase 4: Web Crawling Agent](#phase-4-web-crawling-agent)
-6. [Phase 5: Frontend - Conference Directory](#phase-5-frontend---conference-directory)
-7. [Phase 6: Frontend - Conference Detail Pages](#phase-6-frontend---conference-detail-pages)
-8. [Phase 7: Speaker Intelligence Features](#phase-7-speaker-intelligence-features)
-9. [Phase 8: Company Search & Intelligence](#phase-8-company-search--intelligence)
-10. [Phase 9: Bookmarking System](#phase-9-bookmarking-system)
-11. [Phase 10: Admin Interface](#phase-10-admin-interface)
+5. [Phase 4: Frontend - Conference Directory](#phase-4-frontend---conference-directory)
+6. [Phase 5: Frontend - Conference Detail Pages](#phase-5-frontend---conference-detail-pages)
+7. [Phase 6: Speaker Intelligence Features](#phase-6-speaker-intelligence-features)
+8. [Phase 7: Company Search & Intelligence](#phase-7-company-search--intelligence)
+9. [Phase 8: Bookmarking System](#phase-8-bookmarking-system)
+10. [Phase 9: Admin Interface](#phase-9-admin-interface)
+11. [Phase 10: Web Crawling Agent](#phase-10-web-crawling-agent)
 12. [Phase 11: Testing & Deployment](#phase-11-testing--deployment)
 13. [Phase 12: Authentication & Stripe Billing](#phase-12-authentication--stripe-billing)
 
@@ -127,6 +127,8 @@
      - source_url (text)
      - created_at (timestamp)
      - updated_at (timestamp)
+     
+     **Note:** Future consideration: A universal "Person" model could be introduced where individuals can be Speakers at one conference and Attendees at another. This would require a refactor to have a `people` table with a junction table `conference_people` that includes a `role` field ('speaker', 'attendee', etc.). For MVP, we're keeping the simpler `speakers` table structure.
 
    - [x] Create `exhibitors` table
      - id (uuid, primary key)
@@ -246,60 +248,263 @@
 ### Tasks
 
 1. **Conference Endpoints**
-   - [ ] `app/api/conferences/route.ts`
-     - `GET /api/conferences` (list with filters, pagination)
-     - `POST /api/conferences` (admin only, create)
+   - [x] `app/api/conferences/route.ts`
+     - [x] `GET /api/conferences` (list with filters, pagination)
+     - [x] `POST /api/conferences` (admin only, create)
    
-   - [ ] `app/api/conferences/[id]/route.ts`
-     - `GET /api/conferences/[id]` (get by id)
-     - `PATCH /api/conferences/[id]` (admin only, update)
-     - `DELETE /api/conferences/[id]` (admin only, delete)
+   - [x] `app/api/conferences/[id]/route.ts`
+     - [x] `GET /api/conferences/[id]` (get by id)
+     - [x] `PATCH /api/conferences/[id]` (admin only, update)
+     - [x] `DELETE /api/conferences/[id]` (admin only, delete)
 
-   - [ ] `app/api/conferences/search/route.ts`
-     - `GET /api/conferences/search?q=...` (search)
+   - [x] `app/api/conferences/search/route.ts`
+     - [x] `GET /api/conferences/search?q=...` (search)
 
 2. **Speaker Endpoints**
-   - [ ] `app/api/conferences/[id]/speakers/route.ts`
-     - `GET /api/conferences/[id]/speakers` (get speakers for conference)
+   - [x] `app/api/conferences/[id]/speakers/route.ts`
+     - [x] `GET /api/conferences/[id]/speakers` (get speakers for conference)
 
-   - [ ] `app/api/speakers/companies/route.ts`
-     - `GET /api/speakers/companies?conferenceId=...` (get company stats)
+   - [x] `app/api/speakers/companies/route.ts`
+     - [x] `GET /api/speakers/companies?conferenceId=...` (get company stats)
 
 3. **Exhibitor Endpoints**
-   - [ ] `app/api/conferences/[id]/exhibitors/route.ts`
-     - `GET /api/conferences/[id]/exhibitors` (get exhibitors for conference)
+   - [x] `app/api/conferences/[id]/exhibitors/route.ts`
+     - [x] `GET /api/conferences/[id]/exhibitors` (get exhibitors for conference)
 
 4. **Company Intelligence Endpoints**
-   - [ ] `app/api/companies/search/route.ts`
-     - `GET /api/companies/search?q=...` (search companies)
+   - [x] `app/api/companies/search/route.ts`
+     - [x] `GET /api/companies/search?q=...` (search companies)
 
-   - [ ] `app/api/companies/[companyName]/exhibitors/route.ts`
-     - `GET /api/companies/[companyName]/exhibitors` (exhibitor history)
+   - [x] `app/api/companies/[companyName]/exhibitors/route.ts`
+     - [x] `GET /api/companies/[companyName]/exhibitors` (exhibitor history)
 
-   - [ ] `app/api/companies/[companyName]/speakers/route.ts`
-     - `GET /api/companies/[companyName]/speakers` (speaker history)
+   - [x] `app/api/companies/[companyName]/speakers/route.ts`
+     - [x] `GET /api/companies/[companyName]/speakers` (speaker history)
 
-   - [ ] `app/api/companies/[companyName]/profile/route.ts`
-     - `GET /api/companies/[companyName]/profile` (full intelligence profile)
+   - [x] `app/api/companies/[companyName]/profile/route.ts`
+     - [x] `GET /api/companies/[companyName]/profile` (full intelligence profile)
 
 5. **Bookmark Endpoints**
-   - [ ] `app/api/bookmarks/route.ts`
-     - `GET /api/bookmarks` (user's bookmarks)
-     - `POST /api/bookmarks` (create bookmark)
+   - [x] `app/api/bookmarks/route.ts`
+     - [x] `GET /api/bookmarks` (user's bookmarks)
+     - [x] `POST /api/bookmarks` (create bookmark)
 
-   - [ ] `app/api/bookmarks/[conferenceId]/route.ts`
-     - `DELETE /api/bookmarks/[conferenceId]` (remove bookmark)
+   - [x] `app/api/bookmarks/[conferenceId]/route.ts`
+     - [x] `DELETE /api/bookmarks/[conferenceId]` (remove bookmark)
 
 6. **Admin Endpoints**
-   - [ ] `app/api/admin/crawl/route.ts`
-     - `POST /api/admin/crawl` (trigger crawl for URL)
+   - [x] `app/api/admin/crawl/route.ts`
+     - [x] `POST /api/admin/crawl` (trigger crawl for URL - placeholder for Phase 4)
 
 **Estimated Time:** 8-10 hours  
 **Dependencies:** Phase 2
 
+**Status:** ✅ Complete - All API endpoints implemented with authentication, validation, and error handling
+
 ---
 
-## Phase 4: Web Crawling Agent
+## Phase 4: Frontend - Conference Directory
+
+### Tasks
+
+1. **Layout & Navigation**
+   - [ ] `app/components/layout/Navbar.tsx`
+   - [ ] `app/components/layout/Layout.tsx`
+   - [ ] Set up routing structure
+
+2. **Conference List Page**
+   - [ ] `app/conferences/page.tsx`
+     - Display paginated conference list
+     - Search functionality
+     - Filter by industry, date range, location
+     - Sort by date, name, completeness
+     - Display key info: name, dates, location, simple completeness indicator
+
+3. **Search & Filters Component**
+   - [ ] `app/components/ConferenceFilters.tsx`
+     - Search input
+     - Industry multi-select
+     - Date range picker
+     - Location filter
+     - Clear filters button
+
+4. **Conference Card Component**
+   - [ ] `app/components/ConferenceCard.tsx`
+     - Display conference preview
+     - Link to detail page
+     - Show bookmark button
+     - Show simple data completeness indicator (X of Y fields)
+
+5. **Pagination Component**
+   - [ ] `app/components/Pagination.tsx`
+     - Handle page navigation
+     - Display page numbers
+
+**Estimated Time:** 8-10 hours  
+**Dependencies:** Phase 3
+
+---
+
+## Phase 5: Frontend - Conference Detail Pages
+
+### Tasks
+
+1. **Conference Detail Page**
+   - [ ] `app/conferences/[id]/page.tsx`
+     - Display full conference information
+     - Show all data fields from PRD
+     - Bookmark button
+     - Share functionality
+
+2. **Detail Page Sections**
+   - [ ] `app/components/conferences/BasicInfo.tsx` (dates, location, attendance)
+   - [ ] `app/components/conferences/ExhibitorList.tsx` (simple list, no competitor tags)
+   - [ ] `app/components/conferences/SpeakerList.tsx` (with basic company grouping)
+   - [ ] `app/components/conferences/PricingInfo.tsx` (explicit costs only, show "Unknown" if not available)
+   - [ ] `app/components/conferences/Agenda.tsx` (link to agenda URL if available)
+   - [ ] `app/components/conferences/ContactInfo.tsx`
+   - [ ] `app/components/conferences/DataCompleteness.tsx` (simple field count: "X of Y fields populated", last crawled date)
+
+3. **Basic Speaker Company Stats**
+   - [ ] `app/components/conferences/SpeakerCompanyStats.tsx`
+     - Group speakers by company
+     - Show speaker count per company
+     - Simple list display (no charts, no industry distribution, no seniority analysis)
+
+**Estimated Time:** 10-12 hours  
+**Dependencies:** Phase 3, Phase 4
+
+---
+
+## Phase 6: Speaker Intelligence Features
+
+### Tasks
+
+1. **Speaker List Enhancements**
+   - [ ] Enhance `SpeakerList.tsx` with company grouping
+   - [ ] Add filters: by company, by title, by industry
+   - [ ] Add sorting options
+
+2. **Company Speaker Stats**
+   - [ ] `app/components/speakers/CompanySpeakerStats.tsx`
+     - Display company distribution
+     - Show speaker count per company
+     - Visualize with charts (recharts or similar)
+
+3. **Seniority Pattern Analysis**
+   - [ ] `app/components/speakers/SeniorityPatterns.tsx`
+     - Categorize titles (C-suite, VP, Director, IC, etc.)
+     - Display distribution
+     - Identify patterns (VP-heavy, IC-heavy, etc.)
+
+4. **Industry Distribution**
+   - [ ] `app/components/speakers/IndustryDistribution.tsx`
+     - Show industries represented by speakers
+     - Visualize distribution
+
+**Estimated Time:** 8-10 hours  
+**Dependencies:** Phase 6
+
+---
+
+## Phase 7: Company Search & Intelligence
+
+### Tasks
+
+1. **Company Search Page**
+   - [ ] `app/companies/page.tsx`
+     - Search input
+     - Display search results
+     - Link to company profile
+
+2. **Company Profile Page**
+   - [ ] `app/companies/[companyName]/page.tsx`
+     - Display full company intelligence profile
+     - Show exhibitor history
+     - Show speaker history
+     - Show estimated spend
+
+3. **Company Profile Components**
+   - [ ] `app/components/companies/ExhibitorHistory.tsx`
+     - List conferences where company exhibited
+     - Show tier and explicit cost per conference (if known)
+     - Show total spend (sum of explicit costs only, no estimates)
+     - Show "Unknown" for conferences without explicit pricing
+   
+   - [ ] `app/components/companies/SpeakerHistory.tsx`
+     - List conferences where company had speakers
+     - Show speaker count per conference
+     - Simple list display
+
+3. **Spend Display (Simplified)**
+   - [ ] Display known costs only
+   - [ ] Show "Unknown" for conferences without explicit pricing
+   - [ ] Display disclaimer: "Only explicit costs shown, estimates not included"
+
+**Estimated Time:** 8-10 hours  
+**Dependencies:** Phase 3, Phase 10
+
+---
+
+## Phase 8: Bookmarking System
+
+### Tasks
+
+1. **Bookmark Integration with Auth**
+   - [ ] Use existing authentication from Phase 0
+   - [ ] Protect bookmark routes (require authentication)
+   - [ ] Add user context to bookmark operations
+
+2. **Bookmark UI Components**
+   - [ ] `app/components/BookmarkButton.tsx` (toggle bookmark)
+   - [ ] `app/components/BookmarkIcon.tsx` (bookmark icon with state)
+
+3. **Bookmarks Page**
+   - [ ] `app/bookmarks/page.tsx`
+     - Display user's bookmarked conferences
+     - Same filtering/sorting as main directory
+
+4. **Bookmark Integration**
+   - [ ] Add bookmark buttons to conference cards
+   - [ ] Add bookmark button to detail pages
+   - [ ] Show bookmark count (optional)
+
+**Estimated Time:** 4-6 hours  
+**Dependencies:** Phase 0 (Auth), Phase 1, Phase 3, Phase 4
+
+---
+
+## Phase 9: Admin Interface
+
+### Tasks
+
+1. **Admin Authentication**
+   - [ ] Create admin role check
+   - [ ] Protect admin routes
+   - [ ] Create admin layout
+
+2. **Basic Conference Management**
+   - [ ] `app/admin/conferences/page.tsx`
+     - List all conferences (simple table)
+     - Create new conference (manual entry form)
+     - Edit conference data
+     - Delete conferences
+     - Basic search/filter
+
+3. **Crawl Management (Basic)**
+   - [ ] `app/admin/crawl/page.tsx`
+     - Manual crawl trigger (single URL input)
+     - View crawl logs (simple list, recent first)
+     - Basic error display
+
+**Note:** Advanced admin features (dashboard stats, email outreach, bulk operations, data quality tools) deferred to post-MVP. See `BACKLOG.md`.
+
+**Estimated Time:** 6-8 hours  
+**Dependencies:** Phase 3
+
+---
+
+## Phase 10: Web Crawling Agent
 
 ### Tasks
 
@@ -355,208 +560,9 @@
    - Handle queue of URLs to crawl
 
 **Estimated Time:** 12-15 hours  
-**Dependencies:** Phase 1, Phase 2
+**Dependencies:** Phase 1, Phase 2, Phase 9 (Admin Interface)
 
----
-
-## Phase 5: Frontend - Conference Directory
-
-### Tasks
-
-1. **Layout & Navigation**
-   - [ ] `app/components/layout/Navbar.tsx`
-   - [ ] `app/components/layout/Layout.tsx`
-   - [ ] Set up routing structure
-
-2. **Conference List Page**
-   - [ ] `app/conferences/page.tsx`
-     - Display paginated conference list
-     - Search functionality
-     - Filter by industry, date range, location
-     - Sort by date, name, completeness
-     - Display key info: name, dates, location, simple completeness indicator
-
-3. **Search & Filters Component**
-   - [ ] `app/components/ConferenceFilters.tsx`
-     - Search input
-     - Industry multi-select
-     - Date range picker
-     - Location filter
-     - Clear filters button
-
-4. **Conference Card Component**
-   - [ ] `app/components/ConferenceCard.tsx`
-     - Display conference preview
-     - Link to detail page
-     - Show bookmark button
-     - Show simple data completeness indicator (X of Y fields)
-
-5. **Pagination Component**
-   - [ ] `app/components/Pagination.tsx`
-     - Handle page navigation
-     - Display page numbers
-
-**Estimated Time:** 8-10 hours  
-**Dependencies:** Phase 3
-
----
-
-## Phase 6: Frontend - Conference Detail Pages
-
-### Tasks
-
-1. **Conference Detail Page**
-   - [ ] `app/conferences/[id]/page.tsx`
-     - Display full conference information
-     - Show all data fields from PRD
-     - Bookmark button
-     - Share functionality
-
-2. **Detail Page Sections**
-   - [ ] `app/components/conferences/BasicInfo.tsx` (dates, location, attendance)
-   - [ ] `app/components/conferences/ExhibitorList.tsx` (simple list, no competitor tags)
-   - [ ] `app/components/conferences/SpeakerList.tsx` (with basic company grouping)
-   - [ ] `app/components/conferences/PricingInfo.tsx` (explicit costs only, show "Unknown" if not available)
-   - [ ] `app/components/conferences/Agenda.tsx` (link to agenda URL if available)
-   - [ ] `app/components/conferences/ContactInfo.tsx`
-   - [ ] `app/components/conferences/DataCompleteness.tsx` (simple field count: "X of Y fields populated", last crawled date)
-
-3. **Basic Speaker Company Stats**
-   - [ ] `app/components/conferences/SpeakerCompanyStats.tsx`
-     - Group speakers by company
-     - Show speaker count per company
-     - Simple list display (no charts, no industry distribution, no seniority analysis)
-
-**Estimated Time:** 10-12 hours  
-**Dependencies:** Phase 3, Phase 5
-
----
-
-## Phase 7: Speaker Intelligence Features
-
-### Tasks
-
-1. **Speaker List Enhancements**
-   - [ ] Enhance `SpeakerList.tsx` with company grouping
-   - [ ] Add filters: by company, by title, by industry
-   - [ ] Add sorting options
-
-2. **Company Speaker Stats**
-   - [ ] `app/components/speakers/CompanySpeakerStats.tsx`
-     - Display company distribution
-     - Show speaker count per company
-     - Visualize with charts (recharts or similar)
-
-3. **Seniority Pattern Analysis**
-   - [ ] `app/components/speakers/SeniorityPatterns.tsx`
-     - Categorize titles (C-suite, VP, Director, IC, etc.)
-     - Display distribution
-     - Identify patterns (VP-heavy, IC-heavy, etc.)
-
-4. **Industry Distribution**
-   - [ ] `app/components/speakers/IndustryDistribution.tsx`
-     - Show industries represented by speakers
-     - Visualize distribution
-
-**Estimated Time:** 8-10 hours  
-**Dependencies:** Phase 7
-
----
-
-## Phase 8: Company Search & Intelligence
-
-### Tasks
-
-1. **Company Search Page**
-   - [ ] `app/companies/page.tsx`
-     - Search input
-     - Display search results
-     - Link to company profile
-
-2. **Company Profile Page**
-   - [ ] `app/companies/[companyName]/page.tsx`
-     - Display full company intelligence profile
-     - Show exhibitor history
-     - Show speaker history
-     - Show estimated spend
-
-3. **Company Profile Components**
-   - [ ] `app/components/companies/ExhibitorHistory.tsx`
-     - List conferences where company exhibited
-     - Show tier and explicit cost per conference (if known)
-     - Show total spend (sum of explicit costs only, no estimates)
-     - Show "Unknown" for conferences without explicit pricing
-   
-   - [ ] `app/components/companies/SpeakerHistory.tsx`
-     - List conferences where company had speakers
-     - Show speaker count per conference
-     - Simple list display
-
-3. **Spend Display (Simplified)**
-   - [ ] Display known costs only
-   - [ ] Show "Unknown" for conferences without explicit pricing
-   - [ ] Display disclaimer: "Only explicit costs shown, estimates not included"
-
-**Estimated Time:** 8-10 hours  
-**Dependencies:** Phase 3, Phase 4
-
----
-
-## Phase 9: Bookmarking System
-
-### Tasks
-
-1. **Bookmark Integration with Auth**
-   - [ ] Use existing authentication from Phase 0
-   - [ ] Protect bookmark routes (require authentication)
-   - [ ] Add user context to bookmark operations
-
-2. **Bookmark UI Components**
-   - [ ] `app/components/BookmarkButton.tsx` (toggle bookmark)
-   - [ ] `app/components/BookmarkIcon.tsx` (bookmark icon with state)
-
-3. **Bookmarks Page**
-   - [ ] `app/bookmarks/page.tsx`
-     - Display user's bookmarked conferences
-     - Same filtering/sorting as main directory
-
-4. **Bookmark Integration**
-   - [ ] Add bookmark buttons to conference cards
-   - [ ] Add bookmark button to detail pages
-   - [ ] Show bookmark count (optional)
-
-**Estimated Time:** 4-6 hours  
-**Dependencies:** Phase 0 (Auth), Phase 1, Phase 3, Phase 5
-
----
-
-## Phase 10: Admin Interface
-
-### Tasks
-
-1. **Admin Authentication**
-   - [ ] Create admin role check
-   - [ ] Protect admin routes
-   - [ ] Create admin layout
-
-2. **Basic Conference Management**
-   - [ ] `app/admin/conferences/page.tsx`
-     - List all conferences (simple table)
-     - Create new conference (manual entry form)
-     - Edit conference data
-     - Delete conferences
-     - Basic search/filter
-
-3. **Crawl Management (Basic)**
-   - [ ] `app/admin/crawl/page.tsx`
-     - Manual crawl trigger (single URL input)
-     - View crawl logs (simple list, recent first)
-     - Basic error display
-
-**Note:** Advanced admin features (dashboard stats, email outreach, bulk operations, data quality tools) deferred to post-MVP. See `BACKLOG.md`.
-
-**Estimated Time:** 6-8 hours  
-**Dependencies:** Phase 3, Phase 4
+**Note:** This phase was moved after Phase 9 (Admin Interface) to allow the admin interface to be built first, which can then be used to manually trigger and monitor crawls.
 
 ---
 
@@ -762,17 +768,19 @@
 
 ### Critical Path Dependencies:
 1. Phase 0 → Phase 1 → Phase 2 → Phase 3 (Foundation + Auth)
-2. Phase 1 → Phase 4 (Crawler needs DB)
-3. Phase 2 → Phase 6, 7, 8, 9 (Frontend needs repositories)
-4. Phase 3 → Phase 6, 7, 8, 9 (Frontend needs APIs)
-5. Phase 4 → Phase 9 (Company intelligence needs crawler data)
-6. Phase 0 (Auth) → Phase 9 (Bookmarking requires auth)
-7. Phase 0, 3, 5 → Phase 12 (Billing can be added post-MVP)
+2. Phase 1 → Phase 10 (Crawler needs DB)
+3. Phase 2 → Phase 4, 5, 6, 7, 8 (Frontend needs repositories)
+4. Phase 3 → Phase 4, 5, 6, 7, 8 (Frontend needs APIs)
+5. Phase 10 → Phase 7 (Company intelligence needs crawler data)
+6. Phase 0 (Auth) → Phase 8 (Bookmarking requires auth)
+7. Phase 3 → Phase 9 (Admin Interface needs APIs)
+8. Phase 9 → Phase 10 (Admin Interface can trigger/manage crawls)
+9. Phase 0, 3, 5 → Phase 12 (Billing can be added post-MVP)
 
 ### Recommended Development Order (MVP):
 1. **Week 1:** Phases 0, 1, 2, 3 (Foundation + APIs + Auth)
-2. **Week 2:** Phases 4, 5, 6 (Crawler + Frontend core)
-3. **Week 3:** Phases 7, 8, 9, 10, 11 (Features + Admin + Testing)
+2. **Week 2:** Phases 4, 5, 6, 7, 8, 9 (Frontend + Features + Admin)
+3. **Week 3:** Phase 10, 11 (Crawler + Testing)
 
 **Post-MVP:** Phase 12 (Billing) and features in `BACKLOG.md` can be added after launch
 
