@@ -36,9 +36,9 @@
    - [x] Configure ESLint and Prettier
 
 2. **Supabase Setup**
-   - [ ] Create Supabase project *(Manual step - see notes below)*
+   - [x] Create Supabase project *(Project ID: lhhwnvknimltwxaqwowb, Region: us-east-1)*
    - [x] Install Supabase client libraries (`@supabase/supabase-js`, `@supabase/auth-helpers-nextjs`)
-   - [ ] Configure environment variables (`.env.local`) *(Manual step - requires Supabase project)*
+   - [x] Configure environment variables (`.env.local`) *(All credentials configured and tested)*
    - [x] Set up Supabase client utilities (`lib/supabase.ts`)
    - [x] Set up Supabase Auth helpers for Next.js
 
@@ -94,7 +94,7 @@
 ### Tasks
 
 1. **Core Tables**
-   - [ ] Create `conferences` table
+   - [x] Create `conferences` table
      - id (uuid, primary key)
      - name (text)
      - url (text, unique)
@@ -116,7 +116,7 @@
      - created_at (timestamp)
      - updated_at (timestamp)
 
-   - [ ] Create `speakers` table
+   - [x] Create `speakers` table
      - id (uuid, primary key)
      - conference_id (uuid, foreign key → conferences)
      - name (text)
@@ -128,7 +128,7 @@
      - created_at (timestamp)
      - updated_at (timestamp)
 
-   - [ ] Create `exhibitors` table
+   - [x] Create `exhibitors` table
      - id (uuid, primary key)
      - conference_id (uuid, foreign key → conferences)
      - company_name (text)
@@ -139,14 +139,14 @@
      - created_at (timestamp)
      - updated_at (timestamp)
 
-   - [ ] Create `bookmarks` table
+   - [x] Create `bookmarks` table
      - id (uuid, primary key)
      - user_id (uuid, foreign key → auth.users)
      - conference_id (uuid, foreign key → conferences)
      - created_at (timestamp)
      - UNIQUE(user_id, conference_id)
 
-   - [ ] Create `crawl_logs` table
+   - [x] Create `crawl_logs` table
      - id (uuid, primary key)
      - conference_id (uuid, foreign key → conferences)
      - status (text: 'success', 'failed', 'partial')
@@ -156,21 +156,22 @@
 
 
 2. **Indexes & Views**
-   - [ ] Create indexes:
-     - `conferences(url)` (unique)
-     - `conferences(industry)`
-     - `conferences(start_date)`
-     - `speakers(conference_id)`
-     - `speakers(company)`
-     - `exhibitors(conference_id)`
-     - `exhibitors(company_name)`
-     - `bookmarks(user_id, conference_id)`
+   - [x] Create indexes:
+     - `conferences(url)` (unique) ✅
+     - `conferences(industry)` ✅ (GIN index)
+     - `conferences(start_date)` ✅
+     - `speakers(conference_id)` ✅
+     - `speakers(company)` ✅
+     - `exhibitors(conference_id)` ✅
+     - `exhibitors(company_name)` ✅
+     - `bookmarks(user_id, conference_id)` ✅
+     - Additional indexes: `crawl_logs` indexes, `speakers(name)`, `exhibitors(tier)`, `conferences(created_at)` ✅
 
    - [ ] **Note:** Company intelligence will use simple SQL queries instead of materialized views for MVP. Views can be added later if performance becomes an issue.
 
 3. **Row-Level Security (RLS)**
-   - [ ] Enable RLS on all tables
-   - [ ] Create policies:
+   - [x] Enable RLS on all tables
+   - [x] Create policies:
      - `conferences`: public read, admin write
      - `speakers`: public read, admin write
      - `exhibitors`: public read, admin write
@@ -178,11 +179,13 @@
      - `crawl_logs`: admin only
 
 4. **Storage Buckets**
-   - [ ] Create `raw-html` bucket (public read, admin write)
-   - [ ] Create `pdfs` bucket (public read, admin write)
+   - [x] Create `raw-html` bucket (public read, admin write)
+   - [x] Create `pdfs` bucket (public read, admin write)
 
 **Estimated Time:** 4-6 hours  
 **Dependencies:** Phase 0
+
+**Status:** ✅ Complete - All tables, indexes, RLS policies, and storage buckets created successfully
 
 ---
 
