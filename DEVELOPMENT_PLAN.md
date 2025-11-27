@@ -12,15 +12,16 @@
 3. [Phase 2: Core Data Models & Repositories](#phase-2-core-data-models--repositories)
 4. [Phase 3: API Endpoints](#phase-3-api-endpoints)
 5. [Phase 4: Web Crawling Agent](#phase-4-web-crawling-agent)
-6. [Phase 5: Email Outreach Agent](#phase-5-email-outreach-agent)
-7. [Phase 6: Frontend - Conference Directory](#phase-6-frontend---conference-directory)
-8. [Phase 7: Frontend - Conference Detail Pages](#phase-7-frontend---conference-detail-pages)
-9. [Phase 8: Speaker Intelligence Features](#phase-8-speaker-intelligence-features)
-10. [Phase 9: Company Search & Intelligence](#phase-9-company-search--intelligence)
-11. [Phase 10: Bookmarking System](#phase-10-bookmarking-system)
-12. [Phase 11: Admin Interface](#phase-11-admin-interface)
-13. [Phase 12: Testing & Deployment](#phase-12-testing--deployment)
-14. [Phase 13: Authentication & Stripe Billing](#phase-13-authentication--stripe-billing)
+6. [Phase 5: Frontend - Conference Directory](#phase-5-frontend---conference-directory)
+7. [Phase 6: Frontend - Conference Detail Pages](#phase-6-frontend---conference-detail-pages)
+8. [Phase 7: Speaker Intelligence Features](#phase-7-speaker-intelligence-features)
+9. [Phase 8: Company Search & Intelligence](#phase-8-company-search--intelligence)
+10. [Phase 9: Bookmarking System](#phase-9-bookmarking-system)
+11. [Phase 10: Admin Interface](#phase-10-admin-interface)
+12. [Phase 11: Testing & Deployment](#phase-11-testing--deployment)
+13. [Phase 12: Authentication & Stripe Billing](#phase-12-authentication--stripe-billing)
+
+**Note:** This plan reflects the simplified MVP scope. Post-MVP features are documented in `BACKLOG.md`.
 
 ---
 
@@ -102,7 +103,8 @@
      - organizer_name (text)
      - organizer_email (text)
      - organizer_phone (text)
-     - data_completeness_score (numeric 0-1)
+     - fields_populated_count (integer, number of populated fields)
+     - total_fields_count (integer, total expected fields)
      - last_crawled_at (timestamp)
      - last_verified_at (timestamp)
      - created_at (timestamp)
@@ -114,10 +116,9 @@
      - name (text)
      - title (text)
      - company (text)
-     - company_industry (text)
-     - company_size_bucket (text: 'startup', 'mid', 'enterprise', 'unknown')
+     - company_industry (text, nullable - manual override only)
+     - company_size_bucket (text: 'startup', 'mid', 'enterprise', 'unknown', nullable - manual override only)
      - source_url (text)
-     - confidence_score (numeric 0-1)
      - created_at (timestamp)
      - updated_at (timestamp)
 
@@ -126,12 +127,9 @@
      - conference_id (uuid, foreign key → conferences)
      - company_name (text)
      - exhibitor_tier_raw (text)
-     - exhibitor_tier_normalized (text: 'platinum', 'gold', 'silver', 'bronze', 'standard', 'unknown')
-     - estimated_cost_low (numeric)
-     - estimated_cost_high (numeric)
-     - is_competitor (boolean, default false)
+     - exhibitor_tier_normalized (text: 'platinum', 'gold', 'silver', 'bronze', 'standard', 'unknown', nullable)
+     - estimated_cost (numeric, nullable - only explicit costs, no estimates)
      - source_url (text)
-     - confidence_score (numeric 0-1)
      - created_at (timestamp)
      - updated_at (timestamp)
 
@@ -150,13 +148,6 @@
      - error_message (text)
      - crawled_at (timestamp)
 
-   - [ ] Create `email_outreach_logs` table
-     - id (uuid, primary key)
-     - conference_id (uuid, foreign key → conferences)
-     - recipient_email (text)
-     - subject (text)
-     - status (text: 'sent', 'failed', 'bounced')
-     - sent_at (timestamp)
 
 2. **Indexes & Views**
    - [ ] Create indexes:
@@ -169,20 +160,7 @@
      - `exhibitors(company_name)`
      - `bookmarks(user_id, conference_id)`
 
-   - [ ] Create `company_exhibitor_index` materialized view
-     - company_name
-     - conference_ids (array of uuid)
-     - exhibitor_tiers (array of text)
-     - estimated_annual_spend_low (sum)
-     - estimated_annual_spend_high (sum)
-     - last_updated (timestamp)
-
-   - [ ] Create `company_speaker_index` view
-     - company_name
-     - conference_ids (array of uuid)
-     - speaker_count (count)
-     - roles (array of distinct titles)
-     - industries (array of distinct industries)
+   - [ ] **Note:** Company intelligence will use simple SQL queries instead of materialized views for MVP. Views can be added later if performance becomes an issue.
 
 3. **Row-Level Security (RLS)**
    - [ ] Enable RLS on all tables
@@ -192,14 +170,12 @@
      - `exhibitors`: public read, admin write
      - `bookmarks`: users can read/write their own
      - `crawl_logs`: admin only
-     - `email_outreach_logs`: admin only
 
 4. **Storage Buckets**
    - [ ] Create `raw-html` bucket (public read, admin write)
    - [ ] Create `pdfs` bucket (public read, admin write)
-   - [ ] Create `email-attachments` bucket (admin only)
 
-**Estimated Time:** 6-8 hours  
+**Estimated Time:** 4-6 hours  
 **Dependencies:** Phase 0
 
 ---
@@ -219,7 +195,7 @@
      - `findByUrl(url)`
      - `create(data)`
      - `update(id, data)`
-     - `updateCompletenessScore(id)`
+     - `updateCompletenessCount(id)` (simple field count)
      - `search(query, filters)`
 
 3. **Speaker Repository**
@@ -227,23 +203,21 @@
      - `findByConferenceId(conferenceId)`
      - `findByCompany(companyName)`
      - `createMany(speakers[])`
-     - `getCompanyStats(conferenceId)` (group by company)
-     - `getSeniorityPatterns(conferenceId)`
+     - `getCompanyStats(conferenceId)` (group by company, count per company)
 
 4. **Exhibitor Repository**
    - [ ] `lib/repositories/exhibitors.repository.ts`
      - `findByConferenceId(conferenceId)`
      - `findByCompany(companyName)`
      - `createMany(exhibitors[])`
-     - `getCompetitorList(conferenceId)`
-     - `getTierDistribution(conferenceId)`
+     - `getTierDistribution(conferenceId)` (simple tier counts)
 
 5. **Company Intelligence Repository**
    - [ ] `lib/repositories/company-intelligence.repository.ts`
      - `searchCompanies(query)`
      - `getExhibitorHistory(companyName)`
      - `getSpeakerHistory(companyName)`
-     - `getEstimatedSpend(companyName)`
+     - `getEstimatedSpend(companyName)` (sum of explicit costs only, no estimates)
      - `getFullProfile(companyName)`
 
 6. **Bookmark Repository**
@@ -311,10 +285,7 @@
    - [ ] `app/api/admin/crawl/route.ts`
      - `POST /api/admin/crawl` (trigger crawl for URL)
 
-   - [ ] `app/api/admin/email-outreach/route.ts`
-     - `POST /api/admin/email-outreach` (trigger email outreach)
-
-**Estimated Time:** 10-12 hours  
+**Estimated Time:** 8-10 hours  
 **Dependencies:** Phase 2
 
 ---
@@ -335,94 +306,51 @@
    
    - [ ] `lib/services/crawler/extractors/speakers.ts`
      - Extract speaker list (name, title, company)
-     - Use pattern matching and NLP for parsing
+     - Use pattern matching for parsing
+     - Store company name as-is (no enrichment)
    
    - [ ] `lib/services/crawler/extractors/exhibitors.ts`
      - Extract exhibitor list
-     - Extract tier information
-     - Parse tier names and costs
+     - Extract tier information if explicitly stated
+     - Parse explicit costs only ("Gold Sponsor - $25,000")
    
    - [ ] `lib/services/crawler/extractors/pricing.ts`
-     - Extract ticket pricing
-     - Extract sponsor tier pricing
-     - Handle PDF parsing for pricing docs
-   
-   - [ ] `lib/services/crawler/extractors/agenda.ts`
-     - Extract agenda/schedule information
+     - Extract ticket pricing (if easily accessible)
+     - Extract sponsor tier pricing (explicit costs only)
+     - Basic PDF parsing for pricing docs (if straightforward)
    
    - [ ] `lib/services/crawler/extractors/contact.ts`
      - Extract organizer contact information
+     - Extract agenda URL (store URL only, don't parse content)
 
-3. **Spend Estimation Logic**
-   - [ ] `lib/services/spend-estimation.ts`
+3. **Simplified Spend Extraction**
+   - [ ] `lib/services/spend-extraction.ts` (simplified, no estimation)
      - Parse explicit tier costs ("Gold Sponsor - $25,000")
-     - Extract from PDF pricing documents
-     - Infer tier costs from normalized tier names
-     - Use industry averages for unknown tiers
-     - Return cost ranges (low, high)
+     - Extract from PDF pricing documents (if easily parseable)
+     - Mark as "Unknown" if cost not explicitly stated
+     - **No tier inference, no industry averages, no cost ranges**
 
-4. **Company Intelligence Enrichment**
-   - [ ] `lib/services/company-enrichment.ts`
-     - Enrich speaker companies with industry/size data
-     - Use public APIs (Clearbit, etc.) or manual mapping
-     - Infer company size from public data
-
-5. **Crawler Service Integration**
+4. **Crawler Service Integration**
    - [ ] `lib/services/crawler-service.ts`
      - Orchestrate full crawl process
-     - Save raw HTML to Supabase Storage
-     - Save PDFs to Supabase Storage
+     - Save raw HTML to Supabase Storage (optional)
+     - Save PDFs to Supabase Storage (optional)
      - Update conference records
      - Create speakers and exhibitors records
+     - Calculate simple field count for completeness
      - Log crawl results
 
-6. **Cron Job / Background Task**
+5. **Cron Job / Background Task**
    - [ ] `app/api/cron/crawl/route.ts` (Vercel cron or Supabase Edge Function)
    - Schedule periodic crawls
    - Handle queue of URLs to crawl
 
-**Estimated Time:** 20-25 hours  
+**Estimated Time:** 12-15 hours  
 **Dependencies:** Phase 1, Phase 2
 
 ---
 
-## Phase 5: Email Outreach Agent
-
-### Tasks
-
-1. **Email Service Setup**
-   - [ ] Configure email provider (Resend recommended)
-   - [ ] Set up email templates
-   - [ ] `lib/services/email-service.ts` (email sending utilities)
-
-2. **Email Templates**
-   - [ ] Create template for conference data request
-   - [ ] Personalize with conference name, organizer name
-   - [ ] Include data request form or link
-
-3. **Outreach Logic**
-   - [ ] `lib/services/email-outreach-service.ts`
-     - Find conferences missing data
-     - Generate personalized emails
-     - Send emails via Resend
-     - Log outreach attempts
-     - Handle bounces and failures
-
-4. **Email Parsing (Future)**
-   - [ ] Basic email response parsing (if responses come in)
-   - [ ] Extract data from email attachments
-
-5. **Admin Interface Integration**
-   - [ ] Manual trigger for email outreach
-   - [ ] View outreach logs
-   - [ ] Resend failed emails
-
-**Estimated Time:** 8-10 hours  
-**Dependencies:** Phase 1, Phase 2
-
----
-
-## Phase 6: Frontend - Conference Directory
+## Phase 5: Frontend - Conference Directory
 
 ### Tasks
 
@@ -437,7 +365,7 @@
      - Search functionality
      - Filter by industry, date range, location
      - Sort by date, name, completeness
-     - Display key info: name, dates, location, completeness score
+     - Display key info: name, dates, location, simple completeness indicator
 
 3. **Search & Filters Component**
    - [ ] `app/components/ConferenceFilters.tsx`
@@ -452,19 +380,19 @@
      - Display conference preview
      - Link to detail page
      - Show bookmark button
-     - Show data completeness indicator
+     - Show simple data completeness indicator (X of Y fields)
 
 5. **Pagination Component**
    - [ ] `app/components/Pagination.tsx`
      - Handle page navigation
      - Display page numbers
 
-**Estimated Time:** 10-12 hours  
+**Estimated Time:** 8-10 hours  
 **Dependencies:** Phase 3
 
 ---
 
-## Phase 7: Frontend - Conference Detail Pages
+## Phase 6: Frontend - Conference Detail Pages
 
 ### Tasks
 
@@ -477,31 +405,25 @@
 
 2. **Detail Page Sections**
    - [ ] `app/components/conferences/BasicInfo.tsx` (dates, location, attendance)
-   - [ ] `app/components/conferences/ExhibitorList.tsx` (with competitor tags)
-   - [ ] `app/components/conferences/SpeakerList.tsx` (with company grouping)
-   - [ ] `app/components/conferences/PricingInfo.tsx`
-   - [ ] `app/components/conferences/Agenda.tsx`
+   - [ ] `app/components/conferences/ExhibitorList.tsx` (simple list, no competitor tags)
+   - [ ] `app/components/conferences/SpeakerList.tsx` (with basic company grouping)
+   - [ ] `app/components/conferences/PricingInfo.tsx` (explicit costs only, show "Unknown" if not available)
+   - [ ] `app/components/conferences/Agenda.tsx` (link to agenda URL if available)
    - [ ] `app/components/conferences/ContactInfo.tsx`
-   - [ ] `app/components/conferences/DataCompleteness.tsx` (completeness score, source provenance)
+   - [ ] `app/components/conferences/DataCompleteness.tsx` (simple field count: "X of Y fields populated", last crawled date)
 
-3. **Speaker Intelligence Display**
+3. **Basic Speaker Company Stats**
    - [ ] `app/components/conferences/SpeakerCompanyStats.tsx`
      - Group speakers by company
-     - Show company counts
-     - Show industry distribution
-     - Show seniority patterns
+     - Show speaker count per company
+     - Simple list display (no charts, no industry distribution, no seniority analysis)
 
-4. **Competitive Insights Display**
-   - [ ] `app/components/conferences/CompetitorExhibitors.tsx`
-     - Highlight competitor exhibitors
-     - Show sponsorship tiers
-
-**Estimated Time:** 12-15 hours  
-**Dependencies:** Phase 3, Phase 6
+**Estimated Time:** 10-12 hours  
+**Dependencies:** Phase 3, Phase 5
 
 ---
 
-## Phase 8: Speaker Intelligence Features
+## Phase 7: Speaker Intelligence Features
 
 ### Tasks
 
@@ -532,7 +454,7 @@
 
 ---
 
-## Phase 9: Company Search & Intelligence
+## Phase 8: Company Search & Intelligence
 
 ### Tasks
 
@@ -552,31 +474,26 @@
 3. **Company Profile Components**
    - [ ] `app/components/companies/ExhibitorHistory.tsx`
      - List conferences where company exhibited
-     - Show tier and estimated cost per conference
-     - Show total estimated annual spend
+     - Show tier and explicit cost per conference (if known)
+     - Show total spend (sum of explicit costs only, no estimates)
+     - Show "Unknown" for conferences without explicit pricing
    
    - [ ] `app/components/companies/SpeakerHistory.tsx`
      - List conferences where company had speakers
      - Show speaker count per conference
-     - Show roles/industries
-   
-   - [ ] `app/components/companies/SpendEstimation.tsx`
-     - Display spend range (low, high)
-     - Show breakdown by conference
-     - Indicate which estimates are known vs inferred
-     - Show "Unknown" for conferences without tier data
+     - Simple list display
 
-4. **Spend Estimation Display**
-   - [ ] Visualize spend data
-   - [ ] Show confidence indicators
-   - [ ] Display methodology disclaimer
+3. **Spend Display (Simplified)**
+   - [ ] Display known costs only
+   - [ ] Show "Unknown" for conferences without explicit pricing
+   - [ ] Display disclaimer: "Only explicit costs shown, estimates not included"
 
-**Estimated Time:** 12-15 hours  
+**Estimated Time:** 8-10 hours  
 **Dependencies:** Phase 3, Phase 4
 
 ---
 
-## Phase 10: Bookmarking System
+## Phase 9: Bookmarking System
 
 ### Tasks
 
@@ -600,11 +517,11 @@
    - [ ] Show bookmark count (optional)
 
 **Estimated Time:** 4-6 hours  
-**Dependencies:** Phase 0 (Auth), Phase 1, Phase 3, Phase 6
+**Dependencies:** Phase 0 (Auth), Phase 1, Phase 3, Phase 5
 
 ---
 
-## Phase 11: Admin Interface
+## Phase 10: Admin Interface
 
 ### Tasks
 
@@ -613,51 +530,34 @@
    - [ ] Protect admin routes
    - [ ] Create admin layout
 
-2. **Admin Dashboard**
-   - [ ] `app/admin/page.tsx`
-     - Overview stats
-     - Recent crawls
-     - Recent email outreach
-     - Data completeness metrics
-
-3. **Crawl Management**
-   - [ ] `app/admin/crawl/page.tsx`
-     - Manual crawl trigger
-     - View crawl logs
-     - View crawl queue
-     - Retry failed crawls
-
-4. **Email Outreach Management**
-   - [ ] `app/admin/email-outreach/page.tsx`
-     - Manual email trigger
-     - View outreach logs
-     - Resend failed emails
-
-5. **Conference Management**
+2. **Basic Conference Management**
    - [ ] `app/admin/conferences/page.tsx`
-     - List all conferences
+     - List all conferences (simple table)
+     - Create new conference (manual entry form)
      - Edit conference data
      - Delete conferences
-     - Bulk operations
+     - Basic search/filter
 
-6. **Data Quality Tools**
-   - [ ] `app/admin/data-quality/page.tsx`
-     - View low-completeness conferences
-     - Flag for re-crawl
-     - Manual data entry forms
+3. **Crawl Management (Basic)**
+   - [ ] `app/admin/crawl/page.tsx`
+     - Manual crawl trigger (single URL input)
+     - View crawl logs (simple list, recent first)
+     - Basic error display
 
-**Estimated Time:** 15-20 hours  
-**Dependencies:** Phase 3, Phase 4, Phase 5
+**Note:** Advanced admin features (dashboard stats, email outreach, bulk operations, data quality tools) deferred to post-MVP. See `BACKLOG.md`.
+
+**Estimated Time:** 6-8 hours  
+**Dependencies:** Phase 3, Phase 4
 
 ---
 
-## Phase 12: Testing & Deployment
+## Phase 11: Testing & Deployment
 
 ### Tasks
 
 1. **Unit Tests**
    - [ ] Test repositories
-   - [ ] Test services (crawler, email, spend estimation)
+   - [ ] Test services (crawler, spend extraction)
    - [ ] Test utility functions
 
 2. **Integration Tests**
@@ -701,12 +601,12 @@
    - [ ] Monitor crawl success rates
    - [ ] Monitor API performance
 
-**Estimated Time:** 15-20 hours  
+**Estimated Time:** 12-15 hours  
 **Dependencies:** All previous phases
 
 ---
 
-## Phase 13: Authentication & Stripe Billing
+## Phase 12: Authentication & Stripe Billing
 
 ### Tasks
 
@@ -848,8 +748,8 @@
 
 ## Summary
 
-### Total Estimated Time: 155-200 hours (~4-5 weeks full-time)
-*Includes Phase 13 (Billing) - can be deferred to post-MVP*
+### Total Estimated Time: 100-125 hours (~2.5-3 weeks full-time) for MVP
+*Phase 12 (Billing) and other post-MVP features documented in `BACKLOG.md`*
 
 ### Critical Path Dependencies:
 1. Phase 0 → Phase 1 → Phase 2 → Phase 3 (Foundation + Auth)
@@ -857,28 +757,28 @@
 3. Phase 2 → Phase 6, 7, 8, 9 (Frontend needs repositories)
 4. Phase 3 → Phase 6, 7, 8, 9 (Frontend needs APIs)
 5. Phase 4 → Phase 9 (Company intelligence needs crawler data)
-6. Phase 0 (Auth) → Phase 10 (Bookmarking requires auth)
-7. Phase 0, 3, 6 → Phase 13 (Billing can be added post-MVP)
+6. Phase 0 (Auth) → Phase 9 (Bookmarking requires auth)
+7. Phase 0, 3, 5 → Phase 12 (Billing can be added post-MVP)
 
-### Recommended Development Order:
+### Recommended Development Order (MVP):
 1. **Week 1:** Phases 0, 1, 2, 3 (Foundation + APIs + Auth)
-2. **Week 2:** Phases 4, 5 (Agents)
-3. **Week 3:** Phases 6, 7, 8 (Frontend core features)
-4. **Week 4:** Phases 9, 10, 11, 12 (Advanced features + polish)
-5. **Week 5 (Post-MVP):** Phase 13 (Stripe Billing) - Can be done after launch
+2. **Week 2:** Phases 4, 5, 6 (Crawler + Frontend core)
+3. **Week 3:** Phases 7, 8, 9, 10, 11 (Features + Admin + Testing)
+
+**Post-MVP:** Phase 12 (Billing) and features in `BACKLOG.md` can be added after launch
 
 ### Key Technical Decisions:
 - **Web Crawling:** Use Puppeteer or Playwright (Playwright recommended for better reliability)
 - **Email:** Use Resend (modern, developer-friendly)
 - **PDF Parsing:** Use `pdf-parse` or `pdfjs-dist`
 - **Company Enrichment:** Start with manual mapping, add APIs later if needed
-- **Spend Estimation:** Start simple, refine with real data
+- **Spend Extraction:** Only explicit costs for MVP, no estimation
 - **Authentication:** Supabase Auth (email/password, OAuth optional)
 - **Billing:** Stripe (subscriptions, usage tracking, customer portal)
 
 ### Risk Mitigation:
 - **Crawler Reliability:** Build robust error handling, retry logic, and fallback strategies
-- **Data Quality:** Implement confidence scores and manual review workflows
+- **Data Quality:** Simple field count for completeness, manual review workflows
 - **Performance:** Use database indexes, pagination, and caching from the start
 - **Compliance:** Ensure robots.txt compliance and ethical crawling practices
 
