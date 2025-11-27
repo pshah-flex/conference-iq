@@ -530,7 +530,23 @@
 
 ### Tasks
 
-1. **Enhanced Authentication**
+1. **User Profile Database Schema**
+   - [ ] Create `profiles` table in database:
+     - id (uuid, primary key, references auth.users(id))
+     - display_name (text, nullable)
+     - avatar_url (text, nullable)
+     - bio (text, nullable)
+     - onboarding_completed (boolean, default false)
+     - email_verified (boolean, default false)
+     - last_login_at (timestamp, nullable)
+     - preferences (jsonb, nullable) - for storing user preferences
+     - created_at (timestamp)
+     - updated_at (timestamp)
+   - [ ] Create trigger to automatically create profile when user signs up
+   - [ ] Add RLS policies for profiles (users can read/update their own profile)
+   - [ ] Create indexes on profiles table
+
+2. **Enhanced Authentication**
    - [ ] Review and enhance existing auth from Phase 0
    - [ ] Add email verification flow
    - [ ] Add password reset flow
@@ -541,38 +557,44 @@
    - [ ] Enable authentication on all protected routes
    - [ ] Update middleware to properly enforce authentication
 
-2. **User Profile Management**
+3. **User Profile Management**
+   - [ ] Create `lib/repositories/profiles.repository.ts`:
+     - [ ] `findByUserId(userId)`
+     - [ ] `create(userId, data)`
+     - [ ] `update(userId, data)`
+     - [ ] `updateLastLogin(userId)`
    - [ ] Enhance `app/profile/page.tsx` with full user profile
    - [ ] Add profile editing capabilities
    - [ ] Add account settings page
    - [ ] Add password change functionality
+   - [ ] Add avatar upload functionality (optional)
 
-3. **Protected Routes**
+4. **Protected Routes**
    - [ ] Ensure all bookmark routes require authentication
    - [ ] Ensure admin routes require admin role
    - [ ] Add proper redirects for unauthenticated users
    - [ ] Add proper redirects for non-admin users accessing admin routes
 
-4. **Session Management**
+5. **Session Management**
    - [ ] Implement session refresh logic
    - [ ] Add session timeout handling
    - [ ] Add "Remember me" functionality
    - [ ] Handle token expiration gracefully
 
-5. **Email Verification**
+6. **Email Verification**
    - [ ] Set up email verification templates
    - [ ] Add email verification flow in signup
    - [ ] Add resend verification email functionality
    - [ ] Add verified badge/indicator in UI
 
-6. **Password Reset**
+7. **Password Reset**
    - [ ] Set up password reset email templates
    - [ ] Add "Forgot Password" page
    - [ ] Add password reset flow
    - [ ] Add password reset confirmation page
 
-**Estimated Time:** 8-10 hours  
-**Dependencies:** Phase 0 (Basic Auth), Phase 8 (Bookmarking), Phase 9 (Admin Interface)
+**Estimated Time:** 10-12 hours  
+**Dependencies:** Phase 0 (Basic Auth), Phase 1 (Database Schema), Phase 8 (Bookmarking), Phase 9 (Admin Interface)
 
 **Note:** This phase removes the temporary authentication bypass that was implemented earlier. All authentication features will be fully enabled.
 
