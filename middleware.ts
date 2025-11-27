@@ -49,7 +49,36 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // For non-admin routes, just refresh session
+  // Protect authenticated routes
+  const protectedRoutes = ['/bookmarks', '/profile'];
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+
+  if (isProtectedRoute) {
+    try {
+      const supabase = createMiddlewareClient({ req, res });
+      const { data: { session } } = await supabase.auth.getSession();
+
+      // If no session, redirect to login
+      if (!session) {
+        const url = req.nextUrl.clone();
+        url.pathname = '/auth/login';
+        url.searchParams.set('redirect', pathname);
+        return NextResponse.redirect(url);
+      }
+
+      // User is authenticated - allow access
+      return res;
+    } catch (error) {
+      // If Supabase initialization fails, redirect to login
+      console.error('Middleware Supabase error:', error);
+      const url = req.nextUrl.clone();
+      url.pathname = '/auth/login';
+      url.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // For public routes, just refresh session
   try {
     const supabase = createMiddlewareClient({ req, res });
     // Refresh session if expired
