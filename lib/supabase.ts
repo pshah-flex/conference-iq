@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 import { createClientComponentClient, createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 
 // Environment variables
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -16,7 +15,9 @@ export const createClientSupabase = () => {
 };
 
 // Server-side Supabase client (for Server Components)
-export const createServerSupabase = () => {
+// Must be called from a Server Component or API route
+export const createServerSupabase = async () => {
+  const { cookies } = await import('next/headers');
   return createServerComponentClient({ cookies });
 };
 

@@ -194,47 +194,47 @@
 ### Tasks
 
 1. **Repository Pattern Setup**
-   - [ ] Create `lib/repositories/base.repository.ts` (base class)
-   - [ ] Create repository interfaces in `lib/repositories/types.ts`
+   - [x] Create `lib/repositories/base.repository.ts` (base class)
+   - [x] Create repository interfaces in `lib/repositories/types.ts`
 
 2. **Conference Repository**
-   - [ ] `lib/repositories/conferences.repository.ts`
-     - `findAll(filters, pagination)`
-     - `findById(id)`
-     - `findByUrl(url)`
-     - `create(data)`
-     - `update(id, data)`
-     - `updateCompletenessCount(id)` (simple field count)
-     - `search(query, filters)`
+   - [x] `lib/repositories/conferences.repository.ts`
+     - [x] `findAll(filters, pagination)`
+     - [x] `findById(id)`
+     - [x] `findByUrl(url)`
+     - [x] `create(data)`
+     - [x] `update(id, data)`
+     - [x] `updateCompletenessCount(id)` (simple field count)
+     - [x] `search(query, filters)`
 
 3. **Speaker Repository**
-   - [ ] `lib/repositories/speakers.repository.ts`
-     - `findByConferenceId(conferenceId)`
-     - `findByCompany(companyName)`
-     - `createMany(speakers[])`
-     - `getCompanyStats(conferenceId)` (group by company, count per company)
+   - [x] `lib/repositories/speakers.repository.ts`
+     - [x] `findByConferenceId(conferenceId)`
+     - [x] `findByCompany(companyName)`
+     - [x] `createMany(speakers[])`
+     - [x] `getCompanyStats(conferenceId)` (group by company, count per company)
 
 4. **Exhibitor Repository**
-   - [ ] `lib/repositories/exhibitors.repository.ts`
-     - `findByConferenceId(conferenceId)`
-     - `findByCompany(companyName)`
-     - `createMany(exhibitors[])`
-     - `getTierDistribution(conferenceId)` (simple tier counts)
+   - [x] `lib/repositories/exhibitors.repository.ts`
+     - [x] `findByConferenceId(conferenceId)`
+     - [x] `findByCompany(companyName)`
+     - [x] `createMany(exhibitors[])`
+     - [x] `getTierDistribution(conferenceId)` (simple tier counts)
 
 5. **Company Intelligence Repository**
-   - [ ] `lib/repositories/company-intelligence.repository.ts`
-     - `searchCompanies(query)`
-     - `getExhibitorHistory(companyName)`
-     - `getSpeakerHistory(companyName)`
-     - `getEstimatedSpend(companyName)` (sum of explicit costs only, no estimates)
-     - `getFullProfile(companyName)`
+   - [x] `lib/repositories/company-intelligence.repository.ts`
+     - [x] `searchCompanies(query)`
+     - [x] `getExhibitorHistory(companyName)`
+     - [x] `getSpeakerHistory(companyName)`
+     - [x] `getEstimatedSpend(companyName)` (sum of explicit costs only, no estimates)
+     - [x] `getFullProfile(companyName)`
 
 6. **Bookmark Repository**
-   - [ ] `lib/repositories/bookmarks.repository.ts`
-     - `findByUserId(userId)`
-     - `create(userId, conferenceId)`
-     - `delete(userId, conferenceId)`
-     - `isBookmarked(userId, conferenceId)`
+   - [x] `lib/repositories/bookmarks.repository.ts`
+     - [x] `findByUserId(userId)`
+     - [x] `create(userId, conferenceId)`
+     - [x] `delete(userId, conferenceId)`
+     - [x] `isBookmarked(userId, conferenceId)`
 
 **Estimated Time:** 8-10 hours  
 **Dependencies:** Phase 1
