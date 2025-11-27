@@ -17,9 +17,10 @@
 8. [Phase 7: Company Search & Intelligence](#phase-7-company-search--intelligence)
 9. [Phase 8: Bookmarking System](#phase-8-bookmarking-system)
 10. [Phase 9: Admin Interface](#phase-9-admin-interface)
-11. [Phase 10: Web Crawling Agent](#phase-10-web-crawling-agent)
-12. [Phase 11: Testing & Deployment](#phase-11-testing--deployment)
-13. [Phase 12: Authentication & Stripe Billing](#phase-12-authentication--stripe-billing)
+11. [Phase 10: Authentication](#phase-10-authentication)
+12. [Phase 11: Web Crawling Agent](#phase-11-web-crawling-agent)
+13. [Phase 12: Testing & Deployment](#phase-12-testing--deployment)
+14. [Phase 13: Stripe Billing](#phase-13-stripe-billing)
 
 **Note:** This plan reflects the simplified MVP scope. Post-MVP features are documented in `BACKLOG.md`.
 
@@ -525,7 +526,59 @@
 
 ---
 
-## Phase 10: Web Crawling Agent
+## Phase 10: Authentication
+
+### Tasks
+
+1. **Enhanced Authentication**
+   - [ ] Review and enhance existing auth from Phase 0
+   - [ ] Add email verification flow
+   - [ ] Add password reset flow
+   - [ ] Add OAuth providers (Google, GitHub) - optional
+   - [ ] Add session management and refresh tokens
+   - [ ] Add user onboarding flow
+   - [ ] Remove temporary auth bypass (currently bypassed until Phase 12)
+   - [ ] Enable authentication on all protected routes
+   - [ ] Update middleware to properly enforce authentication
+
+2. **User Profile Management**
+   - [ ] Enhance `app/profile/page.tsx` with full user profile
+   - [ ] Add profile editing capabilities
+   - [ ] Add account settings page
+   - [ ] Add password change functionality
+
+3. **Protected Routes**
+   - [ ] Ensure all bookmark routes require authentication
+   - [ ] Ensure admin routes require admin role
+   - [ ] Add proper redirects for unauthenticated users
+   - [ ] Add proper redirects for non-admin users accessing admin routes
+
+4. **Session Management**
+   - [ ] Implement session refresh logic
+   - [ ] Add session timeout handling
+   - [ ] Add "Remember me" functionality
+   - [ ] Handle token expiration gracefully
+
+5. **Email Verification**
+   - [ ] Set up email verification templates
+   - [ ] Add email verification flow in signup
+   - [ ] Add resend verification email functionality
+   - [ ] Add verified badge/indicator in UI
+
+6. **Password Reset**
+   - [ ] Set up password reset email templates
+   - [ ] Add "Forgot Password" page
+   - [ ] Add password reset flow
+   - [ ] Add password reset confirmation page
+
+**Estimated Time:** 8-10 hours  
+**Dependencies:** Phase 0 (Basic Auth), Phase 8 (Bookmarking), Phase 9 (Admin Interface)
+
+**Note:** This phase removes the temporary authentication bypass that was implemented earlier. All authentication features will be fully enabled.
+
+---
+
+## Phase 11: Web Crawling Agent
 
 ### Tasks
 
@@ -587,7 +640,7 @@
 
 ---
 
-## Phase 11: Testing & Deployment
+## Phase 12: Testing & Deployment
 
 ### Tasks
 
@@ -642,32 +695,24 @@
 
 ---
 
-## Phase 12: Authentication & Stripe Billing
+## Phase 13: Stripe Billing
 
 ### Tasks
 
-1. **Enhanced Authentication**
-   - [ ] Review and enhance existing auth from Phase 0
-   - [ ] Add email verification flow
-   - [ ] Add password reset flow
-   - [ ] Add OAuth providers (Google, GitHub) - optional
-   - [ ] Add session management and refresh tokens
-   - [ ] Add user onboarding flow
-
-2. **Stripe Setup**
+1. **Stripe Setup**
    - [ ] Create Stripe account and get API keys
    - [ ] Install Stripe libraries (`stripe`, `@stripe/stripe-js`)
    - [ ] Set up Stripe webhook endpoint (`app/api/webhooks/stripe/route.ts`)
    - [ ] Configure Stripe products and prices in dashboard
    - [ ] Set up test and production environments
 
-3. **Subscription Plans**
+2. **Subscription Plans**
    - [ ] Define subscription tiers (e.g., Free, Pro, Enterprise)
    - [ ] Create products and prices in Stripe
    - [ ] Design pricing page (`app/pricing/page.tsx`)
    - [ ] Create subscription management UI
 
-4. **Database Schema for Billing**
+3. **Database Schema for Billing**
    - [ ] Create `subscriptions` table:
      - id (uuid, primary key)
      - user_id (uuid, foreign key → auth.users)
@@ -693,7 +738,7 @@
    - [ ] Add `subscription_tier` column to `users` table or user metadata
    - [ ] Create indexes on subscription tables
 
-5. **Stripe Integration Services**
+4. **Stripe Integration Services**
    - [ ] `lib/services/stripe-service.ts`:
      - `createCustomer(userId, email)`
      - `createSubscription(customerId, priceId)`
@@ -708,7 +753,7 @@
      - `incrementUsage(userId, feature)`
      - `getUsageStats(userId, period)`
 
-6. **Billing API Endpoints**
+5. **Billing API Endpoints**
    - [ ] `app/api/billing/create-checkout/route.ts`
      - `POST /api/billing/create-checkout` (create Stripe checkout session)
    
@@ -724,7 +769,7 @@
      - `POST /api/webhooks/stripe` (handle Stripe webhooks)
      - Handle events: `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`
 
-7. **Frontend Billing Pages**
+6. **Frontend Billing Pages**
    - [ ] `app/pricing/page.tsx` (pricing page with plan comparison)
    - [ ] `app/billing/page.tsx` (billing dashboard):
      - Current subscription status
@@ -736,7 +781,7 @@
    - [ ] `app/billing/success/page.tsx` (checkout success page)
    - [ ] `app/billing/cancel/page.tsx` (checkout cancel page)
 
-8. **Feature Gating**
+7. **Feature Gating**
    - [ ] Create `lib/middleware/feature-gate.ts` (middleware for feature access)
    - [ ] Implement feature gates:
      - Free tier: Limited conference views, basic search
@@ -745,19 +790,19 @@
    - [ ] Add feature gate checks to API endpoints
    - [ ] Add upgrade prompts in UI when limits reached
 
-9. **Usage Tracking**
+8. **Usage Tracking**
    - [ ] Track feature usage (conference views, company searches, etc.)
    - [ ] Display usage in billing dashboard
    - [ ] Show usage limits based on subscription tier
    - [ ] Implement rate limiting for API endpoints
 
-10. **Subscription Management UI Components**
+9. **Subscription Management UI Components**
     - [ ] `app/components/billing/SubscriptionCard.tsx` (current subscription display)
     - [ ] `app/components/billing/UsageStats.tsx` (usage statistics)
     - [ ] `app/components/billing/UpgradePrompt.tsx` (upgrade CTA)
     - [ ] `app/components/billing/PlanComparison.tsx` (plan comparison table)
 
-11. **Email Notifications (Billing)**
+10. **Email Notifications (Billing)**
     - [ ] Set up email templates for:
       - Subscription confirmation
       - Payment success
@@ -766,7 +811,7 @@
       - Usage limit warnings
     - [ ] Integrate with email service (Resend)
 
-12. **Testing & Security**
+11. **Testing & Security**
     - [ ] Test subscription flows (test mode)
     - [ ] Test webhook handling
     - [ ] Test feature gating
@@ -776,9 +821,9 @@
     - [ ] Test proration calculations
 
 **Estimated Time:** 20-25 hours  
-**Dependencies:** Phase 0 (Auth), Phase 3 (APIs), Phase 6 (Frontend)
+**Dependencies:** Phase 10 (Authentication), Phase 3 (APIs), Phase 6 (Frontend)
 
-**Note:** This phase can be implemented after core features are complete. It's designed to be added as a monetization layer without disrupting existing functionality.
+**Note:** This phase can be implemented after core features and authentication are complete. It's designed to be added as a monetization layer without disrupting existing functionality.
 
 ---
 
@@ -788,22 +833,23 @@
 *Phase 12 (Billing) and other post-MVP features documented in `BACKLOG.md`*
 
 ### Critical Path Dependencies:
-1. Phase 0 → Phase 1 → Phase 2 → Phase 3 (Foundation + Auth)
-2. Phase 1 → Phase 10 (Crawler needs DB)
+1. Phase 0 → Phase 1 → Phase 2 → Phase 3 (Foundation + Basic Auth)
+2. Phase 1 → Phase 11 (Crawler needs DB)
 3. Phase 2 → Phase 4, 5, 6, 7, 8 (Frontend needs repositories)
 4. Phase 3 → Phase 4, 5, 6, 7, 8 (Frontend needs APIs)
-5. Phase 10 → Phase 7 (Company intelligence needs crawler data)
-6. Phase 0 (Auth) → Phase 8 (Bookmarking requires auth)
+5. Phase 11 → Phase 7 (Company intelligence needs crawler data)
+6. Phase 0 (Basic Auth) → Phase 8 (Bookmarking requires auth)
 7. Phase 3 → Phase 9 (Admin Interface needs APIs)
-8. Phase 9 → Phase 10 (Admin Interface can trigger/manage crawls)
-9. Phase 0, 3, 5 → Phase 12 (Billing can be added post-MVP)
+8. Phase 9 → Phase 11 (Admin Interface can trigger/manage crawls)
+9. Phase 10 (Full Auth) → Phase 13 (Billing requires full authentication)
+10. Phase 0, 3, 5 → Phase 13 (Billing can be added post-MVP)
 
 ### Recommended Development Order (MVP):
-1. **Week 1:** Phases 0, 1, 2, 3 (Foundation + APIs + Auth)
+1. **Week 1:** Phases 0, 1, 2, 3 (Foundation + APIs + Basic Auth)
 2. **Week 2:** Phases 4, 5, 6, 7, 8, 9 (Frontend + Features + Admin)
-3. **Week 3:** Phase 10, 11 (Crawler + Testing)
+3. **Week 3:** Phase 10, 11, 12 (Full Auth + Crawler + Testing)
 
-**Post-MVP:** Phase 12 (Billing) and features in `BACKLOG.md` can be added after launch
+**Post-MVP:** Phase 13 (Billing) and features in `BACKLOG.md` can be added after launch
 
 ### Key Technical Decisions:
 - **Web Crawling:** Use Puppeteer or Playwright (Playwright recommended for better reliability)
