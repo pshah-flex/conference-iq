@@ -5,32 +5,50 @@ export async function GET() {
   try {
     const supabase = await createServerSupabase();
     
-    // Test basic connection
-    const { data, error } = await supabase
-      .from('_test')
-      .select('*')
-      .limit(1);
+    // Test 1: Basic connection - try to query a non-existent table
+    // If we get a "table not found" error, it means connection works!
+    const { error: tableError } = await supabase.from('_connection_test').select('*').limit(0);
     
-    // This will fail (table doesn't exist), but confirms connection works
-    if (error && error.code !== 'PGRST116') {
+    // PGRST116 = table not found (but connection works)
+    // Any other error might indicate connection issues
+    const connectionWorks = tableError?.code === 'PGRST116' || 
+                           tableError?.message?.includes('schema cache') ||
+                           tableError?.message?.includes('Could not find the table');
+    
+    if (!connectionWorks && tableError) {
       return NextResponse.json(
         { 
           success: false, 
-          error: error.message,
-          connection: 'failed'
+          error: tableError.message,
+          connection: 'failed',
+          errorCode: tableError.code
         },
         { status: 500 }
       );
     }
     
-    // Test auth service
-    const { data: session } = await supabase.auth.getSession();
+    // Test 2: Auth service
+    const { data: session, error: authError } = await supabase.auth.getSession();
     
+    if (authError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Connection works but auth failed: ${authError.message}`,
+          connection: 'partial',
+        },
+        { status: 500 }
+      );
+    }
+    
+    // All tests passed!
     return NextResponse.json({
       success: true,
       message: 'Supabase connection successful',
       connection: 'active',
-      hasSession: !!session,
+      database: 'connected',
+      auth: 'working',
+      hasSession: !!session?.session,
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
@@ -39,6 +57,7 @@ export async function GET() {
         success: false,
         error: error.message,
         connection: 'failed',
+        type: 'exception'
       },
       { status: 500 }
     );
