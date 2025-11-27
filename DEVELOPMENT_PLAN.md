@@ -94,7 +94,7 @@
 ### Tasks
 
 1. **Core Tables**
-   - [ ] Create `conferences` table
+   - [x] Create `conferences` table
      - id (uuid, primary key)
      - name (text)
      - url (text, unique)
@@ -116,7 +116,7 @@
      - created_at (timestamp)
      - updated_at (timestamp)
 
-   - [ ] Create `speakers` table
+   - [x] Create `speakers` table
      - id (uuid, primary key)
      - conference_id (uuid, foreign key → conferences)
      - name (text)
@@ -128,7 +128,7 @@
      - created_at (timestamp)
      - updated_at (timestamp)
 
-   - [ ] Create `exhibitors` table
+   - [x] Create `exhibitors` table
      - id (uuid, primary key)
      - conference_id (uuid, foreign key → conferences)
      - company_name (text)
@@ -139,7 +139,7 @@
      - created_at (timestamp)
      - updated_at (timestamp)
 
-   - [ ] Create `bookmarks` table
+   - [x] Create `bookmarks` table
      - id (uuid, primary key)
      - user_id (uuid, foreign key → auth.users)
      - conference_id (uuid, foreign key → conferences)
@@ -169,8 +169,8 @@
    - [ ] **Note:** Company intelligence will use simple SQL queries instead of materialized views for MVP. Views can be added later if performance becomes an issue.
 
 3. **Row-Level Security (RLS)**
-   - [ ] Enable RLS on all tables
-   - [ ] Create policies:
+   - [x] Enable RLS on all tables
+   - [x] Create policies:
      - `conferences`: public read, admin write
      - `speakers`: public read, admin write
      - `exhibitors`: public read, admin write
@@ -178,11 +178,13 @@
      - `crawl_logs`: admin only
 
 4. **Storage Buckets**
-   - [ ] Create `raw-html` bucket (public read, admin write)
-   - [ ] Create `pdfs` bucket (public read, admin write)
+   - [x] Create `raw-html` bucket (public read, admin write)
+   - [x] Create `pdfs` bucket (public read, admin write)
 
 **Estimated Time:** 4-6 hours  
 **Dependencies:** Phase 0
+
+**Status:** ✅ Complete - All tables, indexes, RLS policies, and storage buckets created successfully
 
 ---
 
