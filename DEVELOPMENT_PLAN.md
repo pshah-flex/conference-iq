@@ -38,7 +38,7 @@
 2. **Supabase Setup**
    - [x] Create Supabase project *(Project ID: lhhwnvknimltwxaqwowb, Region: us-east-1)*
    - [x] Install Supabase client libraries (`@supabase/supabase-js`, `@supabase/auth-helpers-nextjs`)
-   - [x] Configure environment variables (`.env.local`) *(Service role key needs to be added manually from dashboard)*
+   - [x] Configure environment variables (`.env.local`) *(All credentials configured and tested)*
    - [x] Set up Supabase client utilities (`lib/supabase.ts`)
    - [x] Set up Supabase Auth helpers for Next.js
 

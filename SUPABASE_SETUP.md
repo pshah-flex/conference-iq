@@ -17,18 +17,15 @@ Create a `.env.local` file in the root directory with the following:
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://lhhwnvknimltwxaqwowb.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxoaHdudmtuaW1sdHd4YXF3b3diIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxOTY2MDYsImV4cCI6MjA3OTc3MjYwNn0.u9diIxzOGx5brzYOFxxCQ-5_mEYGr_sRFyrBUOhH3Ro
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxoaHdudmtuaW1sdHd4YXF3b3diIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDE5NjYwNiwiZXhwIjoyMDc5NzcyNjA2fQ.MOoodpWH4SJyjRbpesWXyrnwfXG7CnyVqlVlfxrHjn8
 
 # Environment
 NODE_ENV=development
 ```
 
-## Getting the Service Role Key
+## Service Role Key
 
-1. Go to https://supabase.com/dashboard/project/lhhwnvknimltwxaqwowb
-2. Navigate to **Settings** > **API**
-3. Find the **service_role** key (it's marked as "secret")
-4. Copy it and replace `your_service_role_key_here` in `.env.local`
+✅ Service role key has been configured and tested.
 
 ## Vercel Environment Variables
 
