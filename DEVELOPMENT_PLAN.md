@@ -485,10 +485,13 @@
 
 ### Tasks
 
-1. **Admin Authentication**
-   - [ ] Create admin role check
-   - [ ] Protect admin routes
-   - [ ] Create admin layout
+1. **Admin Authentication & Security**
+   - [ ] Create admin role check (using `user.user_metadata.role === 'admin'`)
+   - [ ] Protect admin routes in middleware (redirect non-admins)
+   - [ ] Protect admin API routes (use `requireAdmin()`)
+   - [ ] Create admin layout with access check
+   - [ ] Add admin-only error pages (403 Forbidden)
+   - [ ] **Security Note:** Admin interface is ONLY accessible to internal admin staff. All `/admin/*` routes and `/api/admin/*` endpoints must verify admin role.
 
 2. **Basic Conference Management**
    - [ ] `app/admin/conferences/page.tsx`
@@ -505,6 +508,12 @@
      - Basic error display
 
 **Note:** Advanced admin features (dashboard stats, email outreach, bulk operations, data quality tools) deferred to post-MVP. See `BACKLOG.md`.
+
+**Security Requirements:**
+- All admin pages must check for admin role before rendering
+- All admin API routes must use `requireAdmin()` from `lib/utils/auth.ts`
+- Middleware must redirect non-admin users attempting to access `/admin/*` routes
+- Admin role is set in Supabase user metadata: `user_metadata.role = 'admin'`
 
 **Estimated Time:** 6-8 hours  
 **Dependencies:** Phase 3
