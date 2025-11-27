@@ -4,6 +4,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ProfilesRepository } from '@/lib/repositories';
+import { createClientSupabaseWithAuth } from '@/lib/supabase';
 import type { Profile } from '@/types';
 import Link from 'next/link';
 
@@ -15,6 +16,8 @@ export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [resending, setResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -46,6 +49,31 @@ export default function ProfilePage() {
       fetchProfile();
     }
   }, [user]);
+
+  const handleResendVerification = async () => {
+    if (!user?.email) return;
+
+    setResending(true);
+    setResendMessage(null);
+
+    try {
+      const supabase = createClientSupabaseWithAuth();
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: user.email,
+      });
+
+      if (error) {
+        setResendMessage(`Error: ${error.message}`);
+      } else {
+        setResendMessage('Verification email sent! Check your inbox.');
+      }
+    } catch (err: any) {
+      setResendMessage(`Error: ${err.message || 'Failed to send verification email'}`);
+    } finally {
+      setResending(false);
+    }
+  };
 
   if (authLoading || loading) {
     return (
@@ -80,14 +108,30 @@ export default function ProfilePage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <p className="text-sm text-gray-900">{user.email}</p>
-                {profile?.email_verified ? (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-1">
-                    Verified
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">
-                    Not Verified
-                  </span>
+                <div className="mt-2 flex items-center space-x-2">
+                  {profile?.email_verified ? (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Verified
+                    </span>
+                  ) : (
+                    <>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Not Verified
+                      </span>
+                      <button
+                        onClick={handleResendVerification}
+                        disabled={resending}
+                        className="text-xs text-indigo-600 hover:text-indigo-500 disabled:opacity-50"
+                      >
+                        {resending ? 'Sending...' : 'Resend verification email'}
+                      </button>
+                    </>
+                  )}
+                </div>
+                {resendMessage && (
+                  <p className={`text-xs mt-1 ${resendMessage.startsWith('Error') ? 'text-red-600' : 'text-green-600'}`}>
+                    {resendMessage}
+                  </p>
                 )}
               </div>
               <div>

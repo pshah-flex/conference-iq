@@ -30,7 +30,9 @@ export default function LoginPage() {
         setError(error.message);
         setLoading(false);
       } else {
-        router.push('/');
+        // Check for redirect parameter
+        const redirect = new URLSearchParams(window.location.search).get('redirect');
+        router.push(redirect || '/conferences');
         router.refresh();
       }
     } catch (err: any) {
@@ -94,13 +96,23 @@ export default function LoginPage() {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
-          <div className="text-center">
-            <a
-              href="/auth/signup"
-              className="text-sm text-indigo-600 hover:text-indigo-500"
-            >
-              Don&apos;t have an account? Sign up
-            </a>
+          <div className="text-center space-y-2">
+            <div>
+              <a
+                href="/auth/forgot-password"
+                className="text-sm text-indigo-600 hover:text-indigo-500"
+              >
+                Forgot your password?
+              </a>
+            </div>
+            <div>
+              <a
+                href="/auth/signup"
+                className="text-sm text-indigo-600 hover:text-indigo-500"
+              >
+                Don&apos;t have an account? Sign up
+              </a>
+            </div>
           </div>
         </form>
       </div>

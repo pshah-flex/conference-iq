@@ -26,14 +26,23 @@ export default function SignupPage() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/verify-email`,
+        },
       });
 
       if (error) {
         setError(error.message);
         setLoading(false);
       } else {
-        setMessage('Check your email to confirm your account!');
+        // Check if email confirmation is required
+        // Supabase will send a confirmation email if email confirmation is enabled
+        setMessage('Check your email to confirm your account! You can close this page.');
         setLoading(false);
+        // Optionally redirect to login after a delay
+        setTimeout(() => {
+          router.push('/auth/login');
+        }, 3000);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
