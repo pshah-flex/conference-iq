@@ -4,10 +4,25 @@ import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
 
-  // Refresh session if expired
-  await supabase.auth.getSession();
+  // Check if Supabase environment variables are available
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // If env vars are missing, skip Supabase initialization and continue
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return res;
+  }
+
+  try {
+    const supabase = createMiddlewareClient({ req, res });
+    // Refresh session if expired
+    await supabase.auth.getSession();
+  } catch (error) {
+    // If Supabase initialization fails, log error but continue
+    // This prevents middleware from breaking the entire app
+    console.error('Middleware Supabase error:', error);
+  }
 
   return res;
 }
