@@ -6,6 +6,8 @@ export { SpeakersRepository } from './speakers.repository';
 export { ExhibitorsRepository } from './exhibitors.repository';
 export { CompanyIntelligenceRepository } from './company-intelligence.repository';
 export { BookmarksRepository } from './bookmarks.repository';
+export { ProfilesRepository } from './profiles.repository';
+export type { Profile, CreateProfileData, UpdateProfileData } from './profiles.repository';
 
 export type {
   PaginationOptions,

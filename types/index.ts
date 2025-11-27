@@ -71,6 +71,19 @@ export interface Bookmark {
   created_at: string;
 }
 
+export interface Profile {
+  id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  onboarding_completed: boolean;
+  email_verified: boolean;
+  last_login_at: string | null;
+  preferences: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
 // API Response types
 export interface ApiResponse<T> {
   data: T | null;
