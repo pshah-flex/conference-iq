@@ -36,9 +36,9 @@
    - [x] Configure ESLint and Prettier
 
 2. **Supabase Setup**
-   - [ ] Create Supabase project *(Manual step - see notes below)*
+   - [x] Create Supabase project *(Project ID: lhhwnvknimltwxaqwowb, Region: us-east-1)*
    - [x] Install Supabase client libraries (`@supabase/supabase-js`, `@supabase/auth-helpers-nextjs`)
-   - [ ] Configure environment variables (`.env.local`) *(Manual step - requires Supabase project)*
+   - [x] Configure environment variables (`.env.local`) *(Service role key needs to be added manually from dashboard)*
    - [x] Set up Supabase client utilities (`lib/supabase.ts`)
    - [x] Set up Supabase Auth helpers for Next.js
 
