@@ -1,7 +1,8 @@
 // Company Intelligence repository
 
 import { BaseRepository } from './base.repository';
-import type { CompanyIntelligence, RepositoryResult } from './types';
+import type { RepositoryResult } from './types';
+import type { CompanyIntelligence } from '@/types';
 import { ExhibitorsRepository } from './exhibitors.repository';
 import { SpeakersRepository } from './speakers.repository';
 

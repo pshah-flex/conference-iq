@@ -1,7 +1,8 @@
 // Speaker repository
 
 import { BaseRepository } from './base.repository';
-import type { Speaker, RepositoryResult } from './types';
+import type { RepositoryResult } from './types';
+import type { Speaker } from '@/types';
 
 export interface CompanyStats {
   company: string;

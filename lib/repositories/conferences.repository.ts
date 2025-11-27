@@ -1,7 +1,8 @@
 // Conference repository
 
 import { BaseRepository } from './base.repository';
-import type { Conference, PaginatedResult, ConferenceFilters, PaginationOptions, RepositoryResult } from './types';
+import type { PaginatedResult, ConferenceFilters, PaginationOptions, RepositoryResult } from './types';
+import type { Conference } from '@/types';
 
 export class ConferencesRepository extends BaseRepository {
   /**

@@ -1,7 +1,8 @@
 // Exhibitor repository
 
 import { BaseRepository } from './base.repository';
-import type { Exhibitor, RepositoryResult } from './types';
+import type { RepositoryResult } from './types';
+import type { Exhibitor } from '@/types';
 
 export interface TierDistribution {
   tier: string;

@@ -1,11 +1,17 @@
 // Base repository class with common functionality
 
-import { createServerSupabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import type { RepositoryError, RepositoryResult } from './types';
+
+// Environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export abstract class BaseRepository {
   protected getSupabase() {
-    return createServerSupabase();
+    // Create a direct Supabase client for repositories
+    // RLS policies will handle security based on auth context
+    return createClient(supabaseUrl, supabaseAnonKey);
   }
 
   protected handleError(error: unknown): RepositoryError {

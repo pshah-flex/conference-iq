@@ -1,7 +1,8 @@
 // Bookmark repository
 
 import { BaseRepository } from './base.repository';
-import type { Bookmark, RepositoryResult } from './types';
+import type { RepositoryResult } from './types';
+import type { Bookmark } from '@/types';
 
 export class BookmarksRepository extends BaseRepository {
   /**
