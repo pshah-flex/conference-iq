@@ -112,7 +112,7 @@ export class ConferencesRepository extends BaseRepository {
   /**
    * Create a new conference
    */
-  async create(data: Omit<Conference, 'id' | 'created_at' | 'updated_at'>): Promise<RepositoryResult<Conference>> {
+  async create(data: Partial<Omit<Conference, 'id' | 'created_at' | 'updated_at' | 'fields_populated_count' | 'total_fields_count' | 'last_crawled_at' | 'last_verified_at'>> & { name: string; url: string }): Promise<RepositoryResult<Conference>> {
     const supabase = this.getSupabase();
     
     return this.executeQuery(async () => {
