@@ -486,26 +486,27 @@
 ### Tasks
 
 1. **Admin Authentication & Security**
-   - [ ] Create admin role check (using `user.user_metadata.role === 'admin'`)
-   - [ ] Protect admin routes in middleware (redirect non-admins)
-   - [ ] Protect admin API routes (use `requireAdmin()`)
-   - [ ] Create admin layout with access check
-   - [ ] Add admin-only error pages (403 Forbidden)
-   - [ ] **Security Note:** Admin interface is ONLY accessible to internal admin staff. All `/admin/*` routes and `/api/admin/*` endpoints must verify admin role.
+   - [x] Create admin role check (using `user.user_metadata.role === 'admin'`)
+   - [x] Protect admin routes in middleware (redirect non-admins)
+   - [x] Protect admin API routes (use `requireAdmin()`)
+   - [x] Create admin layout with access check
+   - [x] Add admin-only error pages (403 Forbidden)
+   - [x] **Security Note:** Admin interface is ONLY accessible to internal admin staff. All `/admin/*` routes and `/api/admin/*` endpoints must verify admin role.
 
 2. **Basic Conference Management**
-   - [ ] `app/admin/conferences/page.tsx`
-     - List all conferences (simple table)
-     - Create new conference (manual entry form)
-     - Edit conference data
-     - Delete conferences
-     - Basic search/filter
+   - [x] `app/admin/conferences/page.tsx`
+     - [x] List all conferences (simple table)
+     - [x] Create new conference (manual entry form)
+     - [x] Edit conference data
+     - [x] Delete conferences
+     - [x] Basic search/filter
 
 3. **Crawl Management (Basic)**
-   - [ ] `app/admin/crawl/page.tsx`
-     - Manual crawl trigger (single URL input)
-     - View crawl logs (simple list, recent first)
-     - Basic error display
+   - [x] `app/admin/crawl/page.tsx`
+     - [x] Manual crawl trigger (single URL input)
+     - [x] View crawl logs (simple list, recent first)
+     - [x] Basic error display
+   - [x] `app/api/admin/crawl-logs/route.ts` - API endpoint for fetching crawl logs
 
 **Note:** Advanced admin features (dashboard stats, email outreach, bulk operations, data quality tools) deferred to post-MVP. See `BACKLOG.md`.
 
