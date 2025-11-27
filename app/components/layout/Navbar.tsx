@@ -29,6 +29,12 @@ export default function Navbar() {
               >
                 Conferences
               </Link>
+              <Link
+                href="/companies"
+                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Companies
+              </Link>
               {/* TEMPORARY: Bookmarks link hidden until Phase 12 */}
               {/* {user && (
                 <Link
