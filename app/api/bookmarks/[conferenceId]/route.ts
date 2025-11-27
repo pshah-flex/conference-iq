@@ -3,8 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BookmarksRepository } from '@/lib/repositories';
 import { requireAuth } from '@/lib/utils/auth';
-
-const bookmarksRepo = new BookmarksRepository();
+import { createServerSupabase } from '@/lib/supabase';
 
 // DELETE /api/bookmarks/[conferenceId] - Remove bookmark
 export async function DELETE(
@@ -13,6 +12,10 @@ export async function DELETE(
 ) {
   try {
     const user = await requireAuth();
+    const supabase = await createServerSupabase();
+    const bookmarksRepo = new BookmarksRepository();
+    // Set the authenticated Supabase client
+    (bookmarksRepo as any).supabase = supabase;
 
     const result = await bookmarksRepo.delete(user.id, params.conferenceId);
 

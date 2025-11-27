@@ -71,8 +71,21 @@ export default function BookmarkButton({
           setIsBookmarked(false);
           onToggle?.(false);
         } else {
-          const error = await response.json();
-          alert(`Failed to remove bookmark: ${error.error || 'Unknown error'}`);
+          let errorMessage = 'Unknown error occurred';
+          try {
+            const error = await response.json();
+            errorMessage = error.error || error.message || errorMessage;
+          } catch (e) {
+            // If response is not JSON, try to get text
+            try {
+              const text = await response.text();
+              errorMessage = text || errorMessage;
+            } catch (textError) {
+              // Fallback to status text
+              errorMessage = response.statusText || errorMessage;
+            }
+          }
+          alert(`Failed to remove bookmark: ${errorMessage}`);
         }
       } else {
         // Add bookmark
@@ -88,8 +101,21 @@ export default function BookmarkButton({
           setIsBookmarked(true);
           onToggle?.(true);
         } else {
-          const error = await response.json();
-          alert(`Failed to add bookmark: ${error.error || 'Unknown error'}`);
+          let errorMessage = 'Unknown error occurred';
+          try {
+            const error = await response.json();
+            errorMessage = error.error || error.message || errorMessage;
+          } catch (e) {
+            // If response is not JSON, try to get text
+            try {
+              const text = await response.text();
+              errorMessage = text || errorMessage;
+            } catch (textError) {
+              // Fallback to status text
+              errorMessage = response.statusText || errorMessage;
+            }
+          }
+          alert(`Failed to add bookmark: ${errorMessage}`);
         }
       }
     } catch (error) {

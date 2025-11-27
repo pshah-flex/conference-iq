@@ -21,8 +21,14 @@ const getSupabaseAnonKey = () => {
 };
 
 export abstract class BaseRepository {
+  protected supabase?: ReturnType<typeof createClient>;
+  
   protected getSupabase() {
-    // Create a direct Supabase client for repositories
+    // If an authenticated client was set (e.g., from API route), use it
+    if (this.supabase) {
+      return this.supabase;
+    }
+    // Otherwise, create a direct Supabase client for repositories
     // RLS policies will handle security based on auth context
     return createClient(getSupabaseUrl(), getSupabaseAnonKey());
   }

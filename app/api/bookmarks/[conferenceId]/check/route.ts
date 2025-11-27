@@ -3,8 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BookmarksRepository } from '@/lib/repositories';
 import { requireAuth } from '@/lib/utils/auth';
-
-const bookmarksRepo = new BookmarksRepository();
+import { createServerSupabase } from '@/lib/supabase';
 
 // GET /api/bookmarks/[conferenceId]/check - Check if conference is bookmarked
 export async function GET(
@@ -13,6 +12,10 @@ export async function GET(
 ) {
   try {
     const user = await requireAuth();
+    const supabase = await createServerSupabase();
+    const bookmarksRepo = new BookmarksRepository();
+    // Set the authenticated Supabase client
+    (bookmarksRepo as any).supabase = supabase;
     const result = await bookmarksRepo.isBookmarked(user.id, params.conferenceId);
 
     if (result.error) {
