@@ -1,18 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-// TEMPORARY: Auth disabled until Phase 12
-// import { useAuth } from '@/app/contexts/AuthContext';
-// import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/contexts/AuthContext';
 
 export default function Navbar() {
-  // TEMPORARY: Auth disabled until Phase 12
-  // const { user, loading, signOut } = useAuth();
-  // const router = useRouter();
-  // const handleSignOut = async () => {
-  //   await signOut();
-  //   router.push('/');
-  // };
+  const { user, loading } = useAuth();
 
   return (
     <nav className="bg-white shadow-sm border-b">
@@ -35,15 +27,14 @@ export default function Navbar() {
               >
                 Companies
               </Link>
-              {/* TEMPORARY: Bookmarks link hidden until Phase 12 */}
-              {/* {user && (
+              {!loading && (
                 <Link
                   href="/bookmarks"
                   className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Bookmarks
                 </Link>
-              )} */}
+              )}
             </div>
           </div>
           {/* TEMPORARY: Hide auth links until Phase 12 */}

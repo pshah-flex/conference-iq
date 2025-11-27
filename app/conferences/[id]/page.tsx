@@ -16,6 +16,7 @@ import ContactInfo from '@/app/components/conferences/ContactInfo';
 import DataCompleteness from '@/app/components/conferences/DataCompleteness';
 import { ArrowLeft, Share2 } from 'lucide-react';
 import Link from 'next/link';
+import BookmarkButton from '@/app/components/BookmarkButton';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -150,13 +151,20 @@ export default function ConferenceDetailPage() {
               </a>
             )}
           </div>
-          <button
-            onClick={handleShare}
-            className="ml-4 p-2 rounded-md border border-gray-300 hover:bg-gray-50 flex items-center text-sm text-gray-700"
-          >
-            <Share2 className="w-4 h-4 mr-2" />
-            Share
-          </button>
+          <div className="ml-4 flex items-center space-x-2">
+            <BookmarkButton
+              conferenceId={conferenceId}
+              className="p-2 rounded-md border border-gray-300 hover:bg-gray-50"
+              showLabel={true}
+            />
+            <button
+              onClick={handleShare}
+              className="p-2 rounded-md border border-gray-300 hover:bg-gray-50 flex items-center text-sm text-gray-700"
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share
+            </button>
+          </div>
         </div>
       </div>
 
