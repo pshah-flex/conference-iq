@@ -7,6 +7,9 @@ import BasicInfo from '@/app/components/conferences/BasicInfo';
 import ExhibitorList from '@/app/components/conferences/ExhibitorList';
 import SpeakerList from '@/app/components/conferences/SpeakerList';
 import SpeakerCompanyStats from '@/app/components/conferences/SpeakerCompanyStats';
+import CompanySpeakerStats from '@/app/components/speakers/CompanySpeakerStats';
+import SeniorityPatterns from '@/app/components/speakers/SeniorityPatterns';
+import IndustryDistribution from '@/app/components/speakers/IndustryDistribution';
 import PricingInfo from '@/app/components/conferences/PricingInfo';
 import Agenda from '@/app/components/conferences/Agenda';
 import ContactInfo from '@/app/components/conferences/ContactInfo';
@@ -163,7 +166,9 @@ export default function ConferenceDetailPage() {
         <div className="lg:col-span-2 space-y-8">
           <BasicInfo conference={conference} />
           <SpeakerList speakers={speakers} />
-          <SpeakerCompanyStats speakers={speakers} />
+          <CompanySpeakerStats speakers={speakers} />
+          <SeniorityPatterns speakers={speakers} />
+          <IndustryDistribution speakers={speakers} />
           <ExhibitorList exhibitors={exhibitors} />
           <PricingInfo exhibitors={exhibitors} />
         </div>
