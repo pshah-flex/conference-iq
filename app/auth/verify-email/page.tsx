@@ -5,6 +5,7 @@ import { createClientSupabaseWithAuth } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ProfilesRepository } from '@/lib/repositories';
+import { getBaseUrl } from '@/lib/utils/url';
 
 // Force dynamic rendering to avoid build-time Supabase initialization
 export const dynamic = 'force-dynamic';
@@ -19,6 +20,20 @@ function VerifyEmailForm() {
   useEffect(() => {
     const verifyEmail = async () => {
       try {
+        // Check if we're on localhost but should redirect to production
+        const currentOrigin = window.location.origin;
+        const isLocalhost = currentOrigin.includes('localhost') || currentOrigin.includes('127.0.0.1');
+        const productionUrl = getBaseUrl();
+        const shouldRedirect = isLocalhost && productionUrl !== currentOrigin;
+
+        // If we're on localhost but have a production URL, redirect to production with the hash
+        if (shouldRedirect && window.location.hash) {
+          const hash = window.location.hash;
+          const productionVerifyUrl = `${productionUrl}/auth/verify-email${hash}`;
+          window.location.href = productionVerifyUrl;
+          return;
+        }
+
         const supabase = createClientSupabaseWithAuth();
         
         // Get the hash from URL (Supabase sends it as a hash fragment)
@@ -28,8 +43,39 @@ function VerifyEmailForm() {
         const refreshToken = hashParams.get('refresh_token');
         const type = hashParams.get('type');
 
-        if (!accessToken || type !== 'signup') {
-          setError('Invalid verification link');
+        // Also check query params (for PKCE flow)
+        const queryToken = searchParams.get('token_hash');
+        const queryType = searchParams.get('type');
+
+        // Handle PKCE flow (token_hash in query params)
+        if (queryToken && queryType) {
+          const { data, error: verifyError } = await supabase.auth.verifyOtp({
+            type: queryType as any,
+            token_hash: queryToken,
+          });
+
+          if (verifyError) {
+            setError(verifyError.message);
+            setLoading(false);
+            return;
+          }
+
+          if (data?.user) {
+            const profilesRepo = new ProfilesRepository();
+            await profilesRepo.updateEmailVerified(data.user.id, true);
+          }
+
+          setSuccess(true);
+          setLoading(false);
+          setTimeout(() => {
+            router.push('/conferences');
+          }, 2000);
+          return;
+        }
+
+        // Handle implicit flow (access_token in hash)
+        if (!accessToken) {
+          setError('Invalid verification link - no access token found');
           setLoading(false);
           return;
         }
@@ -66,7 +112,7 @@ function VerifyEmailForm() {
     };
 
     verifyEmail();
-  }, [router]);
+  }, [router, searchParams]);
 
   if (loading) {
     return (

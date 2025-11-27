@@ -596,7 +596,30 @@
    - [x] Add password reset flow (`/auth/reset-password`)
    - [x] Add password reset confirmation
 
-**Estimated Time:** 10-12 hours  
+8. **Resend SMTP Configuration (Production Email Service)**
+   - [ ] Configure Resend SMTP in Supabase Dashboard:
+     - [ ] Go to Supabase Dashboard → Project Settings → Auth → SMTP Settings
+     - [ ] Get Resend API key from Resend dashboard
+     - [ ] Configure SMTP settings:
+       - SMTP Host: `smtp.resend.com`
+       - SMTP Port: `465` (SSL) or `587` (TLS)
+       - SMTP User: `resend`
+       - SMTP Password: Resend API key
+       - Sender Email: Verified domain email (e.g., `noreply@yourdomain.com`)
+       - Sender Name: `Conference IQ`
+     - [ ] Verify domain in Resend (if using custom domain)
+     - [ ] Test email delivery (signup, verification, password reset)
+   - [ ] Update Supabase Site URL to production URL:
+     - [ ] Go to Project Settings → Auth → URL Configuration
+     - [ ] Set Site URL to production URL (e.g., `https://conference-iq.vercel.app`)
+     - [ ] Add redirect URLs for production:
+       - `/auth/verify-email`
+       - `/auth/reset-password`
+   - [ ] Document Resend configuration in `EMAIL_VERIFICATION_TROUBLESHOOTING.md`
+   - [ ] Add `NEXT_PUBLIC_SITE_URL` environment variable to Vercel
+   - [ ] **Note:** Supabase's default email service has severe rate limits (4 emails/hour) and is not suitable for production. Resend SMTP is required for production email delivery.
+
+**Estimated Time:** 10-12 hours (includes 1-2 hours for Resend SMTP setup)  
 **Dependencies:** Phase 0 (Basic Auth), Phase 1 (Database Schema), Phase 8 (Bookmarking), Phase 9 (Admin Interface)
 
 **Status:** ✅ Mostly Complete - Core authentication features implemented:
@@ -605,6 +628,7 @@
 - ✅ Password reset flow
 - ✅ Profile editing and password change
 - ✅ Protected routes enforcement
+- ⏳ Resend SMTP configuration (required for production email delivery)
 - ⏳ OAuth providers (optional - can be added later)
 - ⏳ User onboarding flow (can be added later)
 

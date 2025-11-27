@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClientSupabaseWithAuth } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { getAuthRedirectUrl } from '@/lib/utils/url';
 
 // Force dynamic rendering to avoid build-time Supabase initialization
 export const dynamic = 'force-dynamic';
@@ -27,7 +28,7 @@ export default function SignupPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/verify-email`,
+          emailRedirectTo: getAuthRedirectUrl('/auth/verify-email'),
         },
       });
 
