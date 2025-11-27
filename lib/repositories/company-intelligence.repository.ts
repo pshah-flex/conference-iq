@@ -12,11 +12,12 @@ export class CompanyIntelligenceRepository extends BaseRepository {
 
   /**
    * Search for companies (from exhibitors and speakers)
+   * Returns company names with exhibitor and speaker counts
    */
-  async searchCompanies(query: string): Promise<RepositoryResult<string[]>> {
+  async searchCompanies(query: string): Promise<RepositoryResult<Array<{ company_name: string; exhibitor_count: number; speaker_count: number }>>> {
     const supabase = this.getSupabase();
     
-    return this.executeQueryArray(async () => {
+    return this.executeQuery(async () => {
       // Search in exhibitors
       const { data: exhibitors, error: exhibitorError } = await supabase
         .from('exhibitors')
@@ -40,7 +41,7 @@ export class CompanyIntelligenceRepository extends BaseRepository {
         return { data: null, error: speakerError };
       }
 
-      // Combine and deduplicate
+      // Combine and deduplicate, then get counts for each company
       const companies = new Set<string>();
       exhibitors?.forEach((e) => {
         if (e.company_name) companies.add(e.company_name);
@@ -49,7 +50,28 @@ export class CompanyIntelligenceRepository extends BaseRepository {
         if (s.company) companies.add(s.company);
       });
 
-      return { data: Array.from(companies).sort(), error: null };
+      const companyList = Array.from(companies).sort();
+      
+      // Get counts for each company
+      const results = await Promise.all(
+        companyList.map(async (companyName) => {
+          const [exhibitorResult, speakerResult] = await Promise.all([
+            this.exhibitorsRepo.findByCompany(companyName),
+            this.speakersRepo.findByCompany(companyName),
+          ]);
+
+          const exhibitorCount = exhibitorResult.data?.length || 0;
+          const speakerCount = speakerResult.data?.length || 0;
+
+          return {
+            company_name: companyName,
+            exhibitor_count: exhibitorCount,
+            speaker_count: speakerCount,
+          };
+        })
+      );
+
+      return { data: results, error: null };
     });
   }
 
