@@ -20,6 +20,7 @@
 11. [Phase 10: Bookmarking System](#phase-10-bookmarking-system)
 12. [Phase 11: Admin Interface](#phase-11-admin-interface)
 13. [Phase 12: Testing & Deployment](#phase-12-testing--deployment)
+14. [Phase 13: Authentication & Stripe Billing](#phase-13-authentication--stripe-billing)
 
 ---
 
@@ -35,16 +36,25 @@
 
 2. **Supabase Setup**
    - [ ] Create Supabase project
-   - [ ] Install Supabase client libraries (`@supabase/supabase-js`)
+   - [ ] Install Supabase client libraries (`@supabase/supabase-js`, `@supabase/auth-helpers-nextjs`)
    - [ ] Configure environment variables (`.env.local`)
    - [ ] Set up Supabase client utilities (`lib/supabase.ts`)
+   - [ ] Set up Supabase Auth helpers for Next.js
 
-3. **Vercel Configuration**
+3. **Authentication Setup (Basic)**
+   - [ ] Configure Supabase Auth (email/password, OAuth providers optional)
+   - [ ] Create auth context/provider (`app/contexts/AuthContext.tsx`)
+   - [ ] Set up protected route middleware
+   - [ ] Create login/signup pages (`app/auth/login/page.tsx`, `app/auth/signup/page.tsx`)
+   - [ ] Create user profile page (`app/profile/page.tsx`)
+   - [ ] Add user roles system (user, admin) in Supabase
+
+4. **Vercel Configuration**
    - [ ] Configure `vercel.json` for routing
    - [ ] Set up environment variables in Vercel dashboard
    - [ ] Configure build settings
 
-4. **Project Dependencies**
+5. **Project Dependencies**
    - [ ] Install core dependencies:
      - `next`, `react`, `react-dom`
      - `@supabase/supabase-js`
@@ -61,13 +71,13 @@
      - `zod` (validation)
      - `lucide-react` (icons)
 
-5. **Type Definitions**
+6. **Type Definitions**
    - [ ] Create `types/index.ts` with core types:
      - `Conference`, `Speaker`, `Exhibitor`
      - `CompanyIntelligence`, `Bookmark`
      - API response types
 
-**Estimated Time:** 4-6 hours  
+**Estimated Time:** 8-10 hours  
 **Dependencies:** None
 
 ---
@@ -570,11 +580,10 @@
 
 ### Tasks
 
-1. **Authentication Setup**
-   - [ ] Set up Supabase Auth
-   - [ ] Create login/signup pages
-   - [ ] Create auth context/provider
-   - [ ] Protect bookmark routes
+1. **Bookmark Integration with Auth**
+   - [ ] Use existing authentication from Phase 0
+   - [ ] Protect bookmark routes (require authentication)
+   - [ ] Add user context to bookmark operations
 
 2. **Bookmark UI Components**
    - [ ] `app/components/BookmarkButton.tsx` (toggle bookmark)
@@ -590,8 +599,8 @@
    - [ ] Add bookmark button to detail pages
    - [ ] Show bookmark count (optional)
 
-**Estimated Time:** 6-8 hours  
-**Dependencies:** Phase 1, Phase 3, Phase 6
+**Estimated Time:** 4-6 hours  
+**Dependencies:** Phase 0 (Auth), Phase 1, Phase 3, Phase 6
 
 ---
 
@@ -697,22 +706,166 @@
 
 ---
 
+## Phase 13: Authentication & Stripe Billing
+
+### Tasks
+
+1. **Enhanced Authentication**
+   - [ ] Review and enhance existing auth from Phase 0
+   - [ ] Add email verification flow
+   - [ ] Add password reset flow
+   - [ ] Add OAuth providers (Google, GitHub) - optional
+   - [ ] Add session management and refresh tokens
+   - [ ] Add user onboarding flow
+
+2. **Stripe Setup**
+   - [ ] Create Stripe account and get API keys
+   - [ ] Install Stripe libraries (`stripe`, `@stripe/stripe-js`)
+   - [ ] Set up Stripe webhook endpoint (`app/api/webhooks/stripe/route.ts`)
+   - [ ] Configure Stripe products and prices in dashboard
+   - [ ] Set up test and production environments
+
+3. **Subscription Plans**
+   - [ ] Define subscription tiers (e.g., Free, Pro, Enterprise)
+   - [ ] Create products and prices in Stripe
+   - [ ] Design pricing page (`app/pricing/page.tsx`)
+   - [ ] Create subscription management UI
+
+4. **Database Schema for Billing**
+   - [ ] Create `subscriptions` table:
+     - id (uuid, primary key)
+     - user_id (uuid, foreign key → auth.users)
+     - stripe_customer_id (text)
+     - stripe_subscription_id (text)
+     - stripe_price_id (text)
+     - status (text: 'active', 'canceled', 'past_due', etc.)
+     - current_period_start (timestamp)
+     - current_period_end (timestamp)
+     - cancel_at_period_end (boolean)
+     - created_at (timestamp)
+     - updated_at (timestamp)
+   
+   - [ ] Create `subscription_usage` table (for usage tracking):
+     - id (uuid, primary key)
+     - user_id (uuid, foreign key → auth.users)
+     - feature (text: 'conference_views', 'company_searches', etc.)
+     - usage_count (integer)
+     - period_start (timestamp)
+     - period_end (timestamp)
+     - created_at (timestamp)
+
+   - [ ] Add `subscription_tier` column to `users` table or user metadata
+   - [ ] Create indexes on subscription tables
+
+5. **Stripe Integration Services**
+   - [ ] `lib/services/stripe-service.ts`:
+     - `createCustomer(userId, email)`
+     - `createSubscription(customerId, priceId)`
+     - `cancelSubscription(subscriptionId)`
+     - `updateSubscription(subscriptionId, newPriceId)`
+     - `getSubscription(subscriptionId)`
+     - `handleWebhook(event)`
+   
+   - [ ] `lib/services/subscription-service.ts`:
+     - `getUserSubscription(userId)`
+     - `checkFeatureAccess(userId, feature)`
+     - `incrementUsage(userId, feature)`
+     - `getUsageStats(userId, period)`
+
+6. **Billing API Endpoints**
+   - [ ] `app/api/billing/create-checkout/route.ts`
+     - `POST /api/billing/create-checkout` (create Stripe checkout session)
+   
+   - [ ] `app/api/billing/create-portal/route.ts`
+     - `POST /api/billing/create-portal` (create customer portal session)
+   
+   - [ ] `app/api/billing/subscription/route.ts`
+     - `GET /api/billing/subscription` (get user's subscription)
+     - `POST /api/billing/subscription` (create subscription)
+     - `DELETE /api/billing/subscription` (cancel subscription)
+   
+   - [ ] `app/api/webhooks/stripe/route.ts`
+     - `POST /api/webhooks/stripe` (handle Stripe webhooks)
+     - Handle events: `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`
+
+7. **Frontend Billing Pages**
+   - [ ] `app/pricing/page.tsx` (pricing page with plan comparison)
+   - [ ] `app/billing/page.tsx` (billing dashboard):
+     - Current subscription status
+     - Usage statistics
+     - Payment method management
+     - Invoice history
+     - Upgrade/downgrade options
+   
+   - [ ] `app/billing/success/page.tsx` (checkout success page)
+   - [ ] `app/billing/cancel/page.tsx` (checkout cancel page)
+
+8. **Feature Gating**
+   - [ ] Create `lib/middleware/feature-gate.ts` (middleware for feature access)
+   - [ ] Implement feature gates:
+     - Free tier: Limited conference views, basic search
+     - Pro tier: Unlimited views, company intelligence, advanced filters
+     - Enterprise tier: API access, bulk exports, custom features
+   - [ ] Add feature gate checks to API endpoints
+   - [ ] Add upgrade prompts in UI when limits reached
+
+9. **Usage Tracking**
+   - [ ] Track feature usage (conference views, company searches, etc.)
+   - [ ] Display usage in billing dashboard
+   - [ ] Show usage limits based on subscription tier
+   - [ ] Implement rate limiting for API endpoints
+
+10. **Subscription Management UI Components**
+    - [ ] `app/components/billing/SubscriptionCard.tsx` (current subscription display)
+    - [ ] `app/components/billing/UsageStats.tsx` (usage statistics)
+    - [ ] `app/components/billing/UpgradePrompt.tsx` (upgrade CTA)
+    - [ ] `app/components/billing/PlanComparison.tsx` (plan comparison table)
+
+11. **Email Notifications (Billing)**
+    - [ ] Set up email templates for:
+      - Subscription confirmation
+      - Payment success
+      - Payment failure
+      - Subscription cancellation
+      - Usage limit warnings
+    - [ ] Integrate with email service (Resend)
+
+12. **Testing & Security**
+    - [ ] Test subscription flows (test mode)
+    - [ ] Test webhook handling
+    - [ ] Test feature gating
+    - [ ] Test usage tracking
+    - [ ] Verify webhook signature validation
+    - [ ] Test subscription upgrades/downgrades
+    - [ ] Test proration calculations
+
+**Estimated Time:** 20-25 hours  
+**Dependencies:** Phase 0 (Auth), Phase 3 (APIs), Phase 6 (Frontend)
+
+**Note:** This phase can be implemented after core features are complete. It's designed to be added as a monetization layer without disrupting existing functionality.
+
+---
+
 ## Summary
 
-### Total Estimated Time: 135-175 hours (~3.5-4.5 weeks full-time)
+### Total Estimated Time: 155-200 hours (~4-5 weeks full-time)
+*Includes Phase 13 (Billing) - can be deferred to post-MVP*
 
 ### Critical Path Dependencies:
-1. Phase 0 → Phase 1 → Phase 2 → Phase 3 (Foundation)
+1. Phase 0 → Phase 1 → Phase 2 → Phase 3 (Foundation + Auth)
 2. Phase 1 → Phase 4 (Crawler needs DB)
 3. Phase 2 → Phase 6, 7, 8, 9 (Frontend needs repositories)
 4. Phase 3 → Phase 6, 7, 8, 9 (Frontend needs APIs)
 5. Phase 4 → Phase 9 (Company intelligence needs crawler data)
+6. Phase 0 (Auth) → Phase 10 (Bookmarking requires auth)
+7. Phase 0, 3, 6 → Phase 13 (Billing can be added post-MVP)
 
 ### Recommended Development Order:
-1. **Week 1:** Phases 0, 1, 2, 3 (Foundation + APIs)
+1. **Week 1:** Phases 0, 1, 2, 3 (Foundation + APIs + Auth)
 2. **Week 2:** Phases 4, 5 (Agents)
 3. **Week 3:** Phases 6, 7, 8 (Frontend core features)
 4. **Week 4:** Phases 9, 10, 11, 12 (Advanced features + polish)
+5. **Week 5 (Post-MVP):** Phase 13 (Stripe Billing) - Can be done after launch
 
 ### Key Technical Decisions:
 - **Web Crawling:** Use Puppeteer or Playwright (Playwright recommended for better reliability)
@@ -720,6 +873,8 @@
 - **PDF Parsing:** Use `pdf-parse` or `pdfjs-dist`
 - **Company Enrichment:** Start with manual mapping, add APIs later if needed
 - **Spend Estimation:** Start simple, refine with real data
+- **Authentication:** Supabase Auth (email/password, OAuth optional)
+- **Billing:** Stripe (subscriptions, usage tracking, customer portal)
 
 ### Risk Mitigation:
 - **Crawler Reliability:** Build robust error handling, retry logic, and fallback strategies
