@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createClientSupabaseWithAuth } from '@/lib/supabase';
+import { ProfilesRepository } from '@/lib/repositories';
 import { useRouter } from 'next/navigation';
 
 // Force dynamic rendering to avoid build-time Supabase initialization
@@ -30,6 +31,18 @@ export default function LoginPage() {
         setError(error.message);
         setLoading(false);
       } else {
+        // Update last login timestamp
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const profilesRepo = new ProfilesRepository();
+            await profilesRepo.updateLastLogin(user.id);
+          }
+        } catch (err) {
+          // Ignore errors updating last login
+          console.error('Error updating last login:', err);
+        }
+
         // Check for redirect parameter
         const redirect = new URLSearchParams(window.location.search).get('redirect');
         router.push(redirect || '/conferences');

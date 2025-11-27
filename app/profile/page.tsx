@@ -18,6 +18,20 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [resending, setResending] = useState(false);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editForm, setEditForm] = useState({
+    display_name: '',
+    bio: '',
+  });
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -37,6 +51,10 @@ export default function ProfilePage() {
           console.error('Error fetching profile:', result.error);
         } else if (result.data) {
           setProfile(result.data);
+          setEditForm({
+            display_name: result.data.display_name || '',
+            bio: result.data.bio || '',
+          });
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -75,6 +93,99 @@ export default function ProfilePage() {
     }
   };
 
+  const handleSaveProfile = async () => {
+    if (!user) return;
+
+    setSaving(true);
+    try {
+      const profilesRepo = new ProfilesRepository();
+      const result = await profilesRepo.update(user.id, {
+        display_name: editForm.display_name || undefined,
+        bio: editForm.bio || undefined,
+      });
+
+      if (result.error) {
+        alert(`Error updating profile: ${result.error.message}`);
+      } else if (result.data) {
+        setProfile(result.data);
+        setEditing(false);
+      }
+    } catch (error: any) {
+      alert(`Error updating profile: ${error.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    if (profile) {
+      setEditForm({
+        display_name: profile.display_name || '',
+        bio: profile.bio || '',
+      });
+    }
+    setEditing(false);
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setPasswordError(null);
+    setPasswordMessage(null);
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      return;
+    }
+
+    setChangingPassword(true);
+
+    try {
+      const supabase = createClientSupabaseWithAuth();
+      
+      // First verify current password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email!,
+        password: passwordForm.currentPassword,
+      });
+
+      if (signInError) {
+        setPasswordError('Current password is incorrect');
+        setChangingPassword(false);
+        return;
+      }
+
+      // Update password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: passwordForm.newPassword,
+      });
+
+      if (updateError) {
+        setPasswordError(updateError.message);
+      } else {
+        setPasswordMessage('Password changed successfully!');
+        setPasswordForm({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+        setTimeout(() => {
+          setPasswordMessage(null);
+        }, 3000);
+      }
+    } catch (err: any) {
+      setPasswordError(err.message || 'Failed to change password');
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -101,6 +212,78 @@ export default function ProfilePage() {
         </div>
 
         <div className="space-y-6">
+          {/* Profile Information */}
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Profile Information</h3>
+              {!editing && (
+                <button
+                  onClick={() => setEditing(true)}
+                  className="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+                >
+                  Edit Profile
+                </button>
+              )}
+            </div>
+            {editing ? (
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="display_name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Display Name
+                  </label>
+                  <input
+                    id="display_name"
+                    type="text"
+                    value={editForm.display_name}
+                    onChange={(e) => setEditForm({ ...editForm, display_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter your display name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
+                    Bio
+                  </label>
+                  <textarea
+                    id="bio"
+                    value={editForm.bio}
+                    onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Tell us about yourself"
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm font-medium"
+                  >
+                    {saving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    disabled={saving}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                  <p className="text-sm text-gray-900">{profile?.display_name || 'Not set'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                  <p className="text-sm text-gray-900">{profile?.bio || 'Not set'}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Account Information */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
@@ -161,6 +344,71 @@ export default function ProfilePage() {
                 </>
               )}
             </div>
+          </div>
+
+          {/* Change Password */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
+            <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
+              {passwordError && (
+                <div className="rounded-md bg-red-50 p-3">
+                  <p className="text-sm text-red-800">{passwordError}</p>
+                </div>
+              )}
+              {passwordMessage && (
+                <div className="rounded-md bg-green-50 p-3">
+                  <p className="text-sm text-green-800">{passwordMessage}</p>
+                </div>
+              )}
+              <div>
+                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                  Current Password
+                </label>
+                <input
+                  id="currentPassword"
+                  type="password"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                  New Password
+                </label>
+                <input
+                  id="newPassword"
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirm New Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                  required
+                  minLength={6}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={changingPassword}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm font-medium"
+              >
+                {changingPassword ? 'Changing...' : 'Change Password'}
+              </button>
+            </form>
           </div>
 
           {/* Actions */}
