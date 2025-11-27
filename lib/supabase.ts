@@ -1,17 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
 import { createClientComponentClient, createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
-// Environment variables
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// Get environment variables (lazy check to avoid build-time errors)
+const getSupabaseUrl = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
+  }
+  return url;
+};
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
+const getSupabaseAnonKey = () => {
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!key) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable');
+  }
+  return key;
+};
 
 // Client-side Supabase client
 export const createClientSupabase = () => {
-  return createClient(supabaseUrl, supabaseAnonKey);
+  return createClient(getSupabaseUrl(), getSupabaseAnonKey());
 };
 
 // Server-side Supabase client (for Server Components)
@@ -30,9 +39,9 @@ export const createClientSupabaseWithAuth = () => {
 export const createAdminSupabase = () => {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY');
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
   }
-  return createClient(supabaseUrl, serviceRoleKey, {
+  return createClient(getSupabaseUrl(), serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

@@ -3,15 +3,28 @@
 import { createClient } from '@supabase/supabase-js';
 import type { RepositoryError, RepositoryResult } from './types';
 
-// Environment variables
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// Get environment variables (lazy check to avoid build-time errors)
+const getSupabaseUrl = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
+  }
+  return url;
+};
+
+const getSupabaseAnonKey = () => {
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!key) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable');
+  }
+  return key;
+};
 
 export abstract class BaseRepository {
   protected getSupabase() {
     // Create a direct Supabase client for repositories
     // RLS policies will handle security based on auth context
-    return createClient(supabaseUrl, supabaseAnonKey);
+    return createClient(getSupabaseUrl(), getSupabaseAnonKey());
   }
 
   protected handleError(error: unknown): RepositoryError {
