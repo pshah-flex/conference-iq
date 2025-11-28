@@ -6,6 +6,18 @@
  */
 
 import { BaseCrawler, CrawlOptions, CrawlResult } from './base-crawler';
+import {
+  extractBasicInfo,
+  extractSpeakers,
+  extractExhibitors,
+  extractPricing,
+  extractContact,
+  type BasicInfo,
+  type ExtractedSpeaker,
+  type ExtractedExhibitor,
+  type ExtractedPricing,
+  type ExtractedContact,
+} from './extractors';
 
 export interface ConferenceCrawlResult {
   url: string;
@@ -13,13 +25,13 @@ export interface ConferenceCrawlResult {
   statusCode: number;
   error?: string;
   timestamp: Date;
-  // Extracted data will be populated by extractors
-  data?: {
-    basicInfo?: any;
-    speakers?: any[];
-    exhibitors?: any[];
-    pricing?: any;
-    contact?: any;
+  // Extracted data
+  data: {
+    basicInfo: BasicInfo;
+    speakers: ExtractedSpeaker[];
+    exhibitors: ExtractedExhibitor[];
+    pricing: ExtractedPricing;
+    contact: ExtractedContact;
   };
 }
 
@@ -51,11 +63,49 @@ export class ConferenceCrawler extends BaseCrawler {
 
     // If there was an error fetching the page, return early
     if (result.error || result.statusCode !== 200) {
-      return conferenceResult;
+      return {
+        ...conferenceResult,
+        data: {
+          basicInfo: {
+            name: null,
+            start_date: null,
+            end_date: null,
+            city: null,
+            country: null,
+            attendance_estimate: null,
+            industry: null,
+          },
+          speakers: [],
+          exhibitors: [],
+          pricing: {
+            ticket_pricing: null,
+            sponsor_tiers: [],
+            pricing_url: null,
+          },
+          contact: {
+            organizer_name: null,
+            organizer_email: null,
+            organizer_phone: null,
+            agenda_url: null,
+          },
+        },
+      };
     }
 
-    // Data extraction will be done by separate extractor modules
-    // For now, we just return the HTML - extractors will process it later
+    // Extract data using extractor modules
+    const basicInfo = extractBasicInfo(result.html, url);
+    const speakers = extractSpeakers(result.html, url);
+    const exhibitors = extractExhibitors(result.html, url);
+    const pricing = extractPricing(result.html, url);
+    const contact = extractContact(result.html, url);
+
+    conferenceResult.data = {
+      basicInfo,
+      speakers,
+      exhibitors,
+      pricing,
+      contact,
+    };
     
     return conferenceResult;
   }

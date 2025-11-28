@@ -645,25 +645,25 @@
    - [x] Implement robots.txt checking
 
 2. **Data Extraction Modules**
-   - [ ] `lib/services/crawler/extractors/basic-info.ts`
+   - [x] `lib/services/crawler/extractors/basic-info.ts`
      - Extract name, dates, location, URL
    
-   - [ ] `lib/services/crawler/extractors/speakers.ts`
+   - [x] `lib/services/crawler/extractors/speakers.ts`
      - Extract speaker list (name, title, company)
      - Use pattern matching for parsing
      - Store company name as-is (no enrichment)
    
-   - [ ] `lib/services/crawler/extractors/exhibitors.ts`
+   - [x] `lib/services/crawler/extractors/exhibitors.ts`
      - Extract exhibitor list
      - Extract tier information if explicitly stated
      - Parse explicit costs only ("Gold Sponsor - $25,000")
    
-   - [ ] `lib/services/crawler/extractors/pricing.ts`
+   - [x] `lib/services/crawler/extractors/pricing.ts`
      - Extract ticket pricing (if easily accessible)
      - Extract sponsor tier pricing (explicit costs only)
      - Basic PDF parsing for pricing docs (if straightforward)
    
-   - [ ] `lib/services/crawler/extractors/contact.ts`
+   - [x] `lib/services/crawler/extractors/contact.ts`
      - Extract organizer contact information
      - Extract agenda URL (store URL only, don't parse content)
 
