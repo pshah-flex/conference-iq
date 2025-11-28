@@ -668,7 +668,7 @@
      - Extract agenda URL (store URL only, don't parse content)
 
 3. **Simplified Spend Extraction**
-   - [ ] `lib/services/spend-extraction.ts` (simplified, no estimation)
+   - [x] `lib/services/spend-extraction.ts` (simplified, no estimation)
      - Parse explicit tier costs ("Gold Sponsor - $25,000")
      - Extract from PDF pricing documents (if easily parseable)
      - Mark as "Unknown" if cost not explicitly stated
