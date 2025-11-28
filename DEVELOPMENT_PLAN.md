@@ -639,10 +639,10 @@
 ### Tasks
 
 1. **Crawler Core**
-   - [ ] `lib/services/crawler/base-crawler.ts` (base class)
-   - [ ] `lib/services/crawler/conference-crawler.ts` (main crawler)
-   - [ ] Configure Puppeteer/Playwright with ethical settings
-   - [ ] Implement robots.txt checking
+   - [x] `lib/services/crawler/base-crawler.ts` (base class)
+   - [x] `lib/services/crawler/conference-crawler.ts` (main crawler)
+   - [x] Configure Puppeteer/Playwright with ethical settings
+   - [x] Implement robots.txt checking
 
 2. **Data Extraction Modules**
    - [ ] `lib/services/crawler/extractors/basic-info.ts`
