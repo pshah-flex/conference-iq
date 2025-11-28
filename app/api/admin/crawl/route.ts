@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/utils/auth';
+import { CrawlerService } from '@/lib/services/crawler-service';
 import { z } from 'zod';
 
 // POST /api/admin/crawl - Trigger crawl for URL (admin only)
@@ -12,20 +13,55 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     const schema = z.object({
-      url: z.string().url(),
+      url: z.string().url().optional(),
+      conferenceId: z.string().uuid().optional(),
+      saveHtmlToStorage: z.boolean().optional().default(false),
+      savePdfToStorage: z.boolean().optional().default(false),
+      overwriteExisting: z.boolean().optional().default(false),
+    }).refine(data => data.url || data.conferenceId, {
+      message: 'Either url or conferenceId must be provided',
     });
 
-    const { url } = schema.parse(body);
+    const { url, conferenceId, saveHtmlToStorage, savePdfToStorage, overwriteExisting } = schema.parse(body);
 
-    // TODO: This will be implemented in Phase 4 (Web Crawling Agent)
-    // For now, return a placeholder response
+    const crawlerService = new CrawlerService();
+    let result;
+
+    if (conferenceId) {
+      result = await crawlerService.crawlById(conferenceId, {
+        saveHtmlToStorage,
+        savePdfToStorage,
+        overwriteExisting,
+      });
+    } else if (url) {
+      result = await crawlerService.crawlByUrl(url, {
+        saveHtmlToStorage,
+        savePdfToStorage,
+        overwriteExisting,
+      });
+    } else {
+      return NextResponse.json(
+        { error: 'Either url or conferenceId must be provided' },
+        { status: 400 }
+      );
+    }
+
+    if (!result.success) {
+      return NextResponse.json(
+        { 
+          error: result.message,
+          details: result,
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { 
-        message: 'Crawl triggered',
-        url,
-        note: 'Crawler implementation coming in Phase 4'
+      {
+        message: result.message,
+        result,
       },
-      { status: 202 } // Accepted (async operation)
+      { status: result.status === 'success' ? 200 : 202 } // 200 for success, 202 for partial
     );
   } catch (error: any) {
     if (error.message === 'Unauthorized' || error.message.includes('Forbidden')) {
