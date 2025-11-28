@@ -685,7 +685,7 @@
      - Log crawl results
 
 5. **Cron Job / Background Task**
-   - [ ] `app/api/cron/crawl/route.ts` (Vercel cron or Supabase Edge Function)
+   - [x] `app/api/cron/crawl/route.ts` (Vercel cron or Supabase Edge Function)
    - Schedule periodic crawls
    - Handle queue of URLs to crawl
 
