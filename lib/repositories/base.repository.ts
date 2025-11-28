@@ -23,8 +23,14 @@ const getSupabaseAnonKey = () => {
 export abstract class BaseRepository {
   protected supabase?: ReturnType<typeof createClient>;
   
+  constructor(supabaseClient?: ReturnType<typeof createClient>) {
+    if (supabaseClient) {
+      this.supabase = supabaseClient;
+    }
+  }
+  
   protected getSupabase() {
-    // If an authenticated client was set (e.g., from API route), use it
+    // If an authenticated client was set (e.g., from API route or constructor), use it
     if (this.supabase) {
       return this.supabase;
     }

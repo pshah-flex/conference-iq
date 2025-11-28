@@ -7,7 +7,6 @@
  */
 
 import * as cheerio from 'cheerio';
-import pdfParse from 'pdf-parse';
 
 export interface ExtractedPricing {
   ticket_pricing: {
@@ -124,7 +123,10 @@ export function extractPricing(html: string, baseUrl: string): ExtractedPricing 
  */
 export async function extractPricingFromPDF(pdfBuffer: Buffer): Promise<ExtractedPricing> {
   try {
-    const data = await pdfParse(pdfBuffer);
+    // pdf-parse is a CommonJS module, handle import dynamically
+    const pdfParseModule = await import('pdf-parse');
+    const parse = pdfParseModule.default || pdfParseModule;
+    const data = await parse(pdfBuffer);
     const text = data.text;
 
     // Use the same extraction logic as HTML
