@@ -675,7 +675,7 @@
      - **No tier inference, no industry averages, no cost ranges**
 
 4. **Crawler Service Integration**
-   - [ ] `lib/services/crawler-service.ts`
+   - [x] `lib/services/crawler-service.ts`
      - Orchestrate full crawl process
      - Save raw HTML to Supabase Storage (optional)
      - Save PDFs to Supabase Storage (optional)
