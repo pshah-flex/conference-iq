@@ -57,15 +57,16 @@ export abstract class BaseCrawler {
 
     try {
       // Check for Browserless.io WebSocket endpoint (preferred for serverless)
-      const browserlessEndpoint = process.env.BROWSERLESS_WS_ENDPOINT;
+      const browserlessEndpoint = process.env.BROWSERLESS_WS_ENDPOINT || 
+        (process.env.BROWSERLESS_TOKEN ? `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_TOKEN}` : null);
       
       if (browserlessEndpoint) {
         // Use Browserless.io cloud browser (most reliable for serverless)
-        console.log('Connecting to Browserless.io...');
+        console.log('🌐 Connecting to Browserless.io cloud browser...');
         this.browser = await puppeteer.connect({
           browserWSEndpoint: browserlessEndpoint,
         });
-        console.log('Connected to Browserless.io successfully');
+        console.log('✅ Connected to Browserless.io successfully');
         return;
       }
 
