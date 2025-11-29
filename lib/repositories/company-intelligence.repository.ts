@@ -43,10 +43,10 @@ export class CompanyIntelligenceRepository extends BaseRepository {
 
       // Combine and deduplicate, then get counts for each company
       const companies = new Set<string>();
-      exhibitors?.forEach((e) => {
+      exhibitors?.forEach((e: { company_name?: string }) => {
         if (e.company_name) companies.add(e.company_name);
       });
-      speakers?.forEach((s) => {
+      speakers?.forEach((s: { company?: string | null }) => {
         if (s.company) companies.add(s.company);
       });
 
@@ -127,7 +127,7 @@ export class CompanyIntelligenceRepository extends BaseRepository {
 
     // Group by conference and count
     const conferenceMap = new Map<string, number>();
-    speakers.forEach((speaker) => {
+    speakers.forEach((speaker: { conference_id: string }) => {
       const count = conferenceMap.get(speaker.conference_id) || 0;
       conferenceMap.set(speaker.conference_id, count + 1);
     });
