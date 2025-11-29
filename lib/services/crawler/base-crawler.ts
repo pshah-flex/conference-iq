@@ -4,7 +4,7 @@
  * Provides common functionality for web crawlers with ethical settings,
  * robots.txt checking, and proper error handling.
  * 
- * Uses Puppeteer Core with @sparticuz/chromium for serverless compatibility on Vercel.
+ * Supports Browserless.io (recommended for serverless) or local Chromium for development.
  */
 
 import puppeteer, { Browser, Page } from 'puppeteer-core';
@@ -48,8 +48,7 @@ export abstract class BaseCrawler {
 
   /**
    * Initialize the browser instance with ethical settings
-   * Configured for serverless environments (like Vercel)
-   * Uses @sparticuz/chromium which provides a pre-built Chrome binary for serverless
+   * Supports Browserless.io for serverless or local Chromium for development
    */
   protected async initBrowser(): Promise<void> {
     if (this.browser) {
@@ -57,27 +56,48 @@ export abstract class BaseCrawler {
     }
 
     try {
-      // Check if we're in a serverless environment (Vercel, AWS Lambda, etc.)
+      // Check for Browserless.io WebSocket endpoint (preferred for serverless)
+      const browserlessEndpoint = process.env.BROWSERLESS_WS_ENDPOINT;
+      
+      if (browserlessEndpoint) {
+        // Use Browserless.io cloud browser (most reliable for serverless)
+        console.log('Connecting to Browserless.io...');
+        this.browser = await puppeteer.connect({
+          browserWSEndpoint: browserlessEndpoint,
+        });
+        console.log('Connected to Browserless.io successfully');
+        return;
+      }
+
+      // Fallback: Check if we're in a serverless environment and try local Chromium
       const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
       
-      // Configure Chromium for serverless environments
       if (isServerless) {
-        // Use @sparticuz/chromium for serverless (optimized for Vercel/Lambda)
-        // The executablePath() call may try to load fonts, but we can skip font loading
-        
-        // Get executable path - this may internally try to load fonts
-        const executablePath = await chromium.executablePath();
-        
-        this.browser = await puppeteer.launch({
-          args: [
-            ...chromium.args,
-            '--disable-dev-shm-usage',
-            '--disable-gpu',
-            '--disable-font-subpixel-positioning', // Skip font loading issues
-          ],
-          executablePath,
-          headless: true, // Always headless in serverless
-        });
+        // Try to use @sparticuz/chromium for serverless (may have issues)
+        try {
+          const executablePath = await chromium.executablePath();
+          
+          this.browser = await puppeteer.launch({
+            args: [
+              ...chromium.args,
+              '--disable-dev-shm-usage',
+              '--disable-gpu',
+            ],
+            executablePath,
+            headless: true,
+          });
+        } catch (chromiumError: any) {
+          // If local Chromium fails, throw helpful error suggesting Browserless.io
+          throw new Error(
+            `Failed to launch local Chromium in serverless environment: ${chromiumError.message}\n\n` +
+            `💡 **Recommended Solution:** Use Browserless.io for reliable serverless crawling.\n` +
+            `1. Sign up at https://www.browserless.io/\n` +
+            `2. Get your API token\n` +
+            `3. Set BROWSERLESS_WS_ENDPOINT environment variable:\n` +
+            `   wss://chrome.browserless.io?token=YOUR_TOKEN\n` +
+            `\nThis is more reliable than trying to run Chromium in serverless functions.`
+          );
+        }
       } else {
         // Local development - try to use system Chrome
         // Note: For local development, you may need to install regular 'puppeteer' 
@@ -127,10 +147,20 @@ export abstract class BaseCrawler {
 
   /**
    * Close the browser instance
+   * For Browserless.io, we disconnect instead of closing
    */
   protected async closeBrowser(): Promise<void> {
     if (this.browser) {
-      await this.browser.close();
+      const browserlessEndpoint = process.env.BROWSERLESS_WS_ENDPOINT || 
+        (process.env.BROWSERLESS_TOKEN ? `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_TOKEN}` : null);
+      
+      if (browserlessEndpoint && this.browser.isConnected()) {
+        // For Browserless.io, disconnect instead of close
+        await this.browser.disconnect();
+      } else {
+        // For local browser, close normally
+        await this.browser.close();
+      }
       this.browser = null;
     }
   }
