@@ -78,7 +78,7 @@ export class ExhibitorsRepository extends BaseRepository {
 
       // Group and count by tier
       const tierMap = new Map<string, number>();
-      exhibitors?.forEach((exhibitor) => {
+      exhibitors?.forEach((exhibitor: { exhibitor_tier_normalized: string | null }) => {
         const tier = exhibitor.exhibitor_tier_normalized || 'unknown';
         const count = tierMap.get(tier) || 0;
         tierMap.set(tier, count + 1);

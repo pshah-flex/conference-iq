@@ -120,10 +120,9 @@ export abstract class BaseCrawler {
       const allowed = robots.isAllowed(url, ua);
       
       if (!allowed) {
-        const disallowedRules = robots.getDisallowedPaths(ua);
         return {
           allowed: false,
-          reason: `Blocked by robots.txt. Disallowed paths: ${disallowedRules.join(', ') || 'all paths'}`,
+          reason: 'Blocked by robots.txt',
         };
       }
 

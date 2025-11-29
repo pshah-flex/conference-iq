@@ -89,7 +89,7 @@ export class CompanyIntelligenceRepository extends BaseRepository {
     const exhibitors = exhibitorsResult.data;
 
     // Get conference names for each exhibitor
-    const conferenceIds = [...new Set(exhibitors.map((e) => e.conference_id))];
+    const conferenceIds = [...new Set(exhibitors.map((e: { conference_id: string }) => e.conference_id))];
     
     const { data: conferences, error } = await supabase
       .from('conferences')

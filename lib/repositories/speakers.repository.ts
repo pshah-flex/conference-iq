@@ -87,7 +87,7 @@ export class SpeakersRepository extends BaseRepository {
 
         // Group and count in JavaScript
         const statsMap = new Map<string, number>();
-        speakers?.forEach((speaker) => {
+        speakers?.forEach((speaker: { company?: string | null }) => {
           if (speaker.company) {
             const count = statsMap.get(speaker.company) || 0;
             statsMap.set(speaker.company, count + 1);
