@@ -222,8 +222,9 @@ export abstract class BaseCrawler {
         const statusCode = response.status(); // In Puppeteer, status() is a method
 
         // Wait for additional time to ensure page is fully loaded
+        // Note: waitForTimeout was removed in newer Puppeteer versions, use Promise-based delay instead
         if (waitFor > 0) {
-          await page.waitForTimeout(waitFor);
+          await new Promise(resolve => setTimeout(resolve, waitFor));
         }
 
         // Get the HTML content
