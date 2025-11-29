@@ -63,8 +63,6 @@ export abstract class BaseCrawler {
       // Configure Chromium for serverless environments
       if (isServerless) {
         // Use @sparticuz/chromium for serverless (optimized for Vercel/Lambda)
-        chromium.setGraphicsMode(false); // Disable graphics for headless serverless
-        
         this.browser = await puppeteer.launch({
           args: chromium.args,
           defaultViewport: chromium.defaultViewport,
