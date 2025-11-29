@@ -65,7 +65,6 @@ export abstract class BaseCrawler {
         // Use @sparticuz/chromium for serverless (optimized for Vercel/Lambda)
         this.browser = await puppeteer.launch({
           args: chromium.args,
-          defaultViewport: chromium.defaultViewport,
           executablePath: await chromium.executablePath(),
           headless: chromium.headless,
         });
