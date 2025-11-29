@@ -100,11 +100,11 @@ export class CompanyIntelligenceRepository extends BaseRepository {
       return { data: null, error };
     }
 
-    const conferenceMap = new Map(conferences?.map((c: { id: string; name: string }) => [c.id, c.name]) || []);
+    const conferenceMap = new Map<string, string>(conferences?.map((c: { id: string; name: string }) => [c.id, c.name]) || []);
 
     const history = exhibitors.map((exhibitor) => ({
       conference_id: exhibitor.conference_id,
-      conference_name: conferenceMap.get(exhibitor.conference_id) || 'Unknown',
+      conference_name: conferenceMap.get(exhibitor.conference_id) ?? 'Unknown',
       tier: exhibitor.exhibitor_tier_normalized || null,
       cost: exhibitor.estimated_cost ? Number(exhibitor.estimated_cost) : null,
     }));
