@@ -100,7 +100,7 @@ export class CompanyIntelligenceRepository extends BaseRepository {
       return { data: null, error };
     }
 
-    const conferenceMap = new Map(conferences?.map((c) => [c.id, c.name]) || []);
+    const conferenceMap = new Map(conferences?.map((c: { id: string; name: string }) => [c.id, c.name]) || []);
 
     const history = exhibitors.map((exhibitor) => ({
       conference_id: exhibitor.conference_id,
@@ -143,7 +143,7 @@ export class CompanyIntelligenceRepository extends BaseRepository {
       return { data: null, error };
     }
 
-    const conferenceNameMap = new Map(conferences?.map((c) => [c.id, c.name]) || []);
+    const conferenceNameMap = new Map(conferences?.map((c: { id: string; name: string }) => [c.id, c.name]) || []);
 
     const history = Array.from(conferenceMap.entries()).map(([conferenceId, speakerCount]) => ({
       conference_id: conferenceId,
