@@ -66,7 +66,7 @@ export abstract class BaseCrawler {
         this.browser = await puppeteer.launch({
           args: chromium.args,
           executablePath: await chromium.executablePath(),
-          headless: chromium.headless,
+          headless: true, // Always headless in serverless
         });
       } else {
         // Local development - try to use system Chrome
