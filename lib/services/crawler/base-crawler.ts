@@ -4,10 +4,11 @@
  * Provides common functionality for web crawlers with ethical settings,
  * robots.txt checking, and proper error handling.
  * 
- * Uses Puppeteer for better serverless compatibility.
+ * Uses Puppeteer Core with @sparticuz/chromium for serverless compatibility on Vercel.
  */
 
-import puppeteer, { Browser, Page } from 'puppeteer';
+import puppeteer, { Browser, Page } from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 import robotsParser from 'robots-parser';
 import { URL } from 'url';
 
@@ -46,6 +47,7 @@ export abstract class BaseCrawler {
   /**
    * Initialize the browser instance with ethical settings
    * Configured for serverless environments (like Vercel)
+   * Uses @sparticuz/chromium which provides a pre-built Chrome binary for serverless
    */
   protected async initBrowser(): Promise<void> {
     if (this.browser) {
@@ -53,25 +55,65 @@ export abstract class BaseCrawler {
     }
 
     try {
-      this.browser = await puppeteer.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu',
-          '--single-process', // Important for serverless
-          '--disable-software-rasterizer',
-          '--disable-features=IsolateOrigins,site-per-process',
-        ],
-      });
+      // Check if we're in a serverless environment (Vercel, AWS Lambda, etc.)
+      const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+      
+      // Configure Chromium for serverless environments
+      if (isServerless) {
+        // Use @sparticuz/chromium for serverless (optimized for Vercel/Lambda)
+        chromium.setGraphicsMode(false); // Disable graphics for headless serverless
+        
+        this.browser = await puppeteer.launch({
+          args: chromium.args,
+          defaultViewport: chromium.defaultViewport,
+          executablePath: await chromium.executablePath(),
+          headless: chromium.headless,
+        });
+      } else {
+        // Local development - try to use system Chrome
+        // Note: For local development, you may need to install regular 'puppeteer' 
+        // or have Chrome installed in a standard location
+        const fs = await import('fs');
+        const path = await import('path');
+        
+        // Try common Chrome/Chromium paths
+        const possiblePaths = [
+          process.env.PUPPETEER_EXECUTABLE_PATH,
+          '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', // macOS
+          '/usr/bin/google-chrome', // Linux
+          '/usr/bin/chromium-browser', // Linux
+          '/usr/bin/chromium', // Linux
+        ].filter(Boolean) as string[];
+        
+        let executablePath: string | undefined;
+        for (const chromePath of possiblePaths) {
+          if (chromePath && fs.existsSync(chromePath)) {
+            executablePath = chromePath;
+            break;
+          }
+        }
+        
+        this.browser = await puppeteer.launch({
+          headless: true,
+          executablePath,
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--disable-gpu',
+            '--single-process',
+            '--disable-software-rasterizer',
+            '--disable-features=IsolateOrigins,site-per-process',
+          ],
+        });
+      }
     } catch (error: any) {
       throw new Error(
         `Failed to launch browser: ${error.message}\n` +
-        `This may be a serverless environment issue. Ensure Puppeteer is properly installed.`
+        `Ensure @sparticuz/chromium is installed for serverless environments.`
       );
     }
   }
