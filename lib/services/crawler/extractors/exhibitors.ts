@@ -123,7 +123,7 @@ export function extractExhibitors(html: string, baseUrl: string): ExtractedExhib
   const exhibitors: ExtractedExhibitor[] = [];
 
   // Find exhibitor/sponsor sections
-  let exhibitorElements: cheerio.Cheerio<cheerio.Element> = $();
+  let exhibitorElements: any = $();
 
   for (const selector of EXHIBITOR_SELECTORS) {
     const elements = $(selector);

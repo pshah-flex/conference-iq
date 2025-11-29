@@ -67,7 +67,7 @@ export function extractContact(html: string, baseUrl: string): ExtractedContact 
   };
 
   // Find contact section
-  let contactSection: cheerio.Cheerio<cheerio.Element> = $();
+  let contactSection: any = $();
 
   for (const selector of CONTACT_SELECTORS) {
     const elements = $(selector);

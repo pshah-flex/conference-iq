@@ -53,7 +53,7 @@ export function extractSpeakers(html: string, baseUrl: string): ExtractedSpeaker
   const speakers: ExtractedSpeaker[] = [];
 
   // Find speaker sections
-  let speakerElements: cheerio.Cheerio<cheerio.Element> = $();
+  let speakerElements: any = $();
 
   for (const selector of SPEAKER_SELECTORS) {
     const elements = $(selector);
