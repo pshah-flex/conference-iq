@@ -63,16 +63,16 @@ export abstract class BaseCrawler {
       // Configure Chromium for serverless environments
       if (isServerless) {
         // Use @sparticuz/chromium for serverless (optimized for Vercel/Lambda)
-        // Configure chromium to skip font loading if fonts aren't available
-        try {
-          await chromium.font();
-        } catch (fontError) {
-          // Font loading may fail in some serverless environments, continue anyway
-          console.warn('Chromium font loading failed, continuing without fonts:', fontError);
-        }
+        // Skip font loading as it can cause issues in some serverless environments
+        // Fonts are not critical for headless crawling
         
         this.browser = await puppeteer.launch({
-          args: [...chromium.args, '--disable-dev-shm-usage', '--disable-gpu'],
+          args: [
+            ...chromium.args,
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--disable-font-loading', // Skip font loading to avoid brotli file errors
+          ],
           executablePath: await chromium.executablePath(),
           headless: true, // Always headless in serverless
         });
