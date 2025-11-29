@@ -51,6 +51,32 @@ export class ConferenceCrawler extends BaseCrawler {
     // Fetch the page
     const result: CrawlResult = await this.fetchPage(url, crawlOptions);
 
+    // Default empty data structure
+    const defaultData = {
+      basicInfo: {
+        name: null,
+        start_date: null,
+        end_date: null,
+        city: null,
+        country: null,
+        attendance_estimate: null,
+        industry: null,
+      },
+      speakers: [] as ExtractedSpeaker[],
+      exhibitors: [] as ExtractedExhibitor[],
+      pricing: {
+        ticket_pricing: null,
+        sponsor_tiers: [],
+        pricing_url: null,
+      },
+      contact: {
+        organizer_name: null,
+        organizer_email: null,
+        organizer_phone: null,
+        agenda_url: null,
+      },
+    };
+
     // Convert to ConferenceCrawlResult
     const conferenceResult: ConferenceCrawlResult = {
       url: result.url,
@@ -58,38 +84,12 @@ export class ConferenceCrawler extends BaseCrawler {
       statusCode: result.statusCode,
       error: result.error,
       timestamp: result.timestamp,
-      data: {},
+      data: defaultData,
     };
 
     // If there was an error fetching the page, return early
     if (result.error || result.statusCode !== 200) {
-      return {
-        ...conferenceResult,
-        data: {
-          basicInfo: {
-            name: null,
-            start_date: null,
-            end_date: null,
-            city: null,
-            country: null,
-            attendance_estimate: null,
-            industry: null,
-          },
-          speakers: [],
-          exhibitors: [],
-          pricing: {
-            ticket_pricing: null,
-            sponsor_tiers: [],
-            pricing_url: null,
-          },
-          contact: {
-            organizer_name: null,
-            organizer_email: null,
-            organizer_phone: null,
-            agenda_url: null,
-          },
-        },
-      };
+      return conferenceResult;
     }
 
     // Extract data using extractor modules
