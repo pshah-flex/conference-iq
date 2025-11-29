@@ -1,6 +1,7 @@
 // Base repository class with common functionality
 
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { RepositoryError, RepositoryResult } from './types';
 
 // Get environment variables (lazy check to avoid build-time errors)
@@ -21,15 +22,15 @@ const getSupabaseAnonKey = () => {
 };
 
 export abstract class BaseRepository {
-  protected supabase?: ReturnType<typeof createClient>;
+  protected supabase?: any; // Use 'any' for flexibility with different Supabase client types
   
-  constructor(supabaseClient?: ReturnType<typeof createClient>) {
+  constructor(supabaseClient?: any) {
     if (supabaseClient) {
       this.supabase = supabaseClient;
     }
   }
   
-  protected getSupabase() {
+  protected getSupabase(): any {
     // If an authenticated client was set (e.g., from API route or constructor), use it
     if (this.supabase) {
       return this.supabase;
