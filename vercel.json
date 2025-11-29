@@ -9,7 +9,12 @@
       "path": "/api/cron/crawl",
       "schedule": "0 2 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 300
+    }
+  }
 }
 
 

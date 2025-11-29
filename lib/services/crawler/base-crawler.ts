@@ -3,9 +3,11 @@
  * 
  * Provides common functionality for web crawlers with ethical settings,
  * robots.txt checking, and proper error handling.
+ * 
+ * Uses Puppeteer for better serverless compatibility.
  */
 
-import { chromium, Browser, Page, BrowserContext } from 'playwright';
+import puppeteer, { Browser, Page } from 'puppeteer';
 import robotsParser from 'robots-parser';
 import { URL } from 'url';
 
@@ -32,7 +34,6 @@ export interface RobotsCheckResult {
 
 export abstract class BaseCrawler {
   protected browser: Browser | null = null;
-  protected context: BrowserContext | null = null;
   protected defaultUserAgent: string;
   protected defaultTimeout: number = 30000; // 30 seconds
   protected defaultWaitFor: number = 2000; // 2 seconds after page load
@@ -44,48 +45,41 @@ export abstract class BaseCrawler {
 
   /**
    * Initialize the browser instance with ethical settings
+   * Configured for serverless environments (like Vercel)
    */
   protected async initBrowser(): Promise<void> {
     if (this.browser) {
       return; // Already initialized
     }
 
-    this.browser = await chromium.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu',
-      ],
-    });
-
-    this.context = await this.browser.newContext({
-      userAgent: this.defaultUserAgent,
-      viewport: { width: 1920, height: 1080 },
-      // Respect do-not-track header
-      extraHTTPHeaders: {
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-      },
-    });
+    try {
+      this.browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
+          '--single-process', // Important for serverless
+          '--disable-software-rasterizer',
+          '--disable-features=IsolateOrigins,site-per-process',
+        ],
+      });
+    } catch (error: any) {
+      throw new Error(
+        `Failed to launch browser: ${error.message}\n` +
+        `This may be a serverless environment issue. Ensure Puppeteer is properly installed.`
+      );
+    }
   }
 
   /**
    * Close the browser instance
    */
   protected async closeBrowser(): Promise<void> {
-    if (this.context) {
-      await this.context.close();
-      this.context = null;
-    }
     if (this.browser) {
       await this.browser.close();
       this.browser = null;
@@ -153,8 +147,8 @@ export abstract class BaseCrawler {
   protected async fetchPage(url: string, options: CrawlOptions = {}): Promise<CrawlResult> {
     await this.initBrowser();
 
-    if (!this.context) {
-      throw new Error('Browser context not initialized');
+    if (!this.browser) {
+      throw new Error('Browser not initialized');
     }
 
     const {
@@ -162,12 +156,13 @@ export abstract class BaseCrawler {
       waitFor = this.defaultWaitFor,
       respectRobotsTxt = true,
       headers = {},
+      userAgent = this.defaultUserAgent,
     } = options;
 
     try {
       // Check robots.txt if required
       if (respectRobotsTxt) {
-        const robotsCheck = await this.checkRobotsTxt(url, options.userAgent);
+        const robotsCheck = await this.checkRobotsTxt(url, userAgent);
         if (!robotsCheck.allowed) {
           return {
             url,
@@ -190,17 +185,33 @@ export abstract class BaseCrawler {
       }
 
       // Create a new page
-      const page = await this.context.newPage();
+      const page = await this.browser.newPage();
 
       try {
-        // Set additional headers if provided
-        if (Object.keys(headers).length > 0) {
-          await page.setExtraHTTPHeaders(headers);
-        }
+        // Set user agent
+        await page.setUserAgent(userAgent);
+
+        // Set viewport
+        await page.setViewport({ width: 1920, height: 1080 });
+
+        // Set additional headers if provided (default + custom)
+        const defaultHeaders = {
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'DNT': '1',
+          'Connection': 'keep-alive',
+          'Upgrade-Insecure-Requests': '1',
+        };
+        
+        await page.setExtraHTTPHeaders({
+          ...defaultHeaders,
+          ...headers,
+        });
 
         // Navigate to the URL with timeout
         const response = await page.goto(url, {
-          waitUntil: 'networkidle',
+          waitUntil: 'networkidle2', // Puppeteer uses 'networkidle2' instead of 'networkidle'
           timeout,
         });
 
@@ -208,7 +219,7 @@ export abstract class BaseCrawler {
           throw new Error('No response from page');
         }
 
-        const statusCode = response.status();
+        const statusCode = response.status(); // In Puppeteer, status() is a method
 
         // Wait for additional time to ensure page is fully loaded
         if (waitFor > 0) {
