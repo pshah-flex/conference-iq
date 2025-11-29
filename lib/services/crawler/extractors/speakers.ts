@@ -69,7 +69,7 @@ export function extractSpeakers(html: string, baseUrl: string): ExtractedSpeaker
     speakerElements = $('[class*="card"], [class*="item"], [class*="person"], li, .grid > div');
   }
 
-  speakerElements.each((_, element) => {
+  speakerElements.each((_: any, element: any) => {
     const $element = $(element);
     const text = $element.text().trim();
 

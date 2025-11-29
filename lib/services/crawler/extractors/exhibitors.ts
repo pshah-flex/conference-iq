@@ -138,7 +138,7 @@ export function extractExhibitors(html: string, baseUrl: string): ExtractedExhib
     exhibitorElements = $('[class*="card"], [class*="item"], [class*="logo"], li, .grid > div');
   }
 
-  exhibitorElements.each((_, element) => {
+  exhibitorElements.each((_: any, element: any) => {
     const $element = $(element);
     const text = $element.text().trim();
     const htmlContent = $element.html() || '';

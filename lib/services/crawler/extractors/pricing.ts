@@ -124,7 +124,7 @@ export function extractPricing(html: string, baseUrl: string): ExtractedPricing 
 export async function extractPricingFromPDF(pdfBuffer: Buffer): Promise<ExtractedPricing> {
   try {
     // pdf-parse is a CommonJS module, handle import dynamically
-    const pdfParseModule = await import('pdf-parse');
+    const pdfParseModule: any = await import('pdf-parse');
     const parse = pdfParseModule.default || pdfParseModule;
     const data = await parse(pdfBuffer);
     const text = data.text;

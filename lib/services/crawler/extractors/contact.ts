@@ -154,7 +154,7 @@ export function extractContact(html: string, baseUrl: string): ExtractedContact 
 
   // Alternative: look for agenda in page links
   if (!result.agenda_url) {
-    $('a[href]').each((_, element) => {
+    $('a[href]').each((_: any, element: any) => {
       const href = $(element).attr('href');
       const text = $(element).text().toLowerCase();
       
