@@ -11,6 +11,8 @@ import puppeteer, { Browser, Page } from 'puppeteer-core';
 import chromium from '@sparticuz/chromium';
 import robotsParser from 'robots-parser';
 import { URL } from 'url';
+import fs from 'fs';
+import path from 'path';
 
 export interface CrawlOptions {
   timeout?: number;
@@ -73,8 +75,6 @@ export abstract class BaseCrawler {
         // Local development - try to use system Chrome
         // Note: For local development, you may need to install regular 'puppeteer' 
         // or have Chrome installed in a standard location
-        const fs = await import('fs');
-        const path = await import('path');
         
         // Try common Chrome/Chromium paths
         const possiblePaths = [
